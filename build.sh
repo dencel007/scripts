@@ -290,7 +290,7 @@ if [[ $GITBRANCH == miui ]]; then
   rm -r $ZIP_DIR/modules/pronto
   cp -f $MODULES_DIR/*.ko $ZIP_DIR/modules/
   mkdir -p $ZIP_DIR/modules/pronto
-  mv $ZIP_DIR/modules/wlan.ko $ZIP_DIR/modules/pronto/pronto_wlan.ko
+  cp -f $ZIP_DIR/modules/wlan.ko $ZIP_DIR/modules/pronto/pronto_wlan.ko
 
 fi
 
@@ -318,14 +318,15 @@ then
   fi
 
 # final push to telegram
-curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F https://api.telegram.org/bot$BOT_API_KEY/sendDocument caption="
+curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
 $url
-$ZIP_NAME"
+$ZIP_NAME" https://api.telegram.org/bot$BOT_API_KEY/sendDocument 
+
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
 ⚙️ $KERNEL_NAME CI build successful 
 📕 branch : $BRANCH_NAME
-🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
 🔰 linux-version : $KERNEL_VERSION
+🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
 
 toolchain : 
 $TC_TYPE
