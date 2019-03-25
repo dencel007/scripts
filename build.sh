@@ -89,7 +89,7 @@ else
   export TCPREFIX=aarch64-linux-android-
 fi
 
-export PRECROSSCOMPILE=$GCCDIR/bin/$TCPREFIX
+export CROSS_COMPILE=$GCCDIR/bin/$TCPREFIX
 
 # functions - @infinity-plus
 function sendlog {
@@ -152,43 +152,6 @@ fi
 # sets CCACHE path
 echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc && source ~/.bashrc && echo $PATH
 
-# CCACHE configuration - @bitrvmpd
-# ==========================================
-# If you want you can install ccache to speedup recompilation time.
-# In ubuntu just run "sudo apt-get install ccache".
-# By default CCACHE will use 6G, change the value of CCACHE_MAX_SIZE
-# to meet your needs.
-if [ -x "$(command -v ccache)" ]
-then
-  # If you want to clean the ccache
-  # run this script with -clear-ccache
-  if [[ "$*" == *"-clear-ccache"* ]]
-  then
-    echo -e "\n\033[0;31m> cleaning $KERNEL_WORKING_DIR/.ccache contents\033[0;0m"
-    rm -rf "$KERNEL_WORKING_DIR/.ccache"
-  fi
-  # If you want to build *without* using ccache
-  # run this script with -no-ccache flag
-  if [[ "$*" != *"-no-ccache"* ]]
-  then
-    export USE_CCACHE=1
-    export CCACHE_DIR="$KERNEL_WORKING_DIR/.ccache"
-    export CCACHE_MAX_SIZE=6G
-    echo -e "\n\033[0;32m> $(ccache -M $CCACHE_MAX_SIZE)\033[0;0m"
-    echo -e "\n\033[0;32m> using ccache, to disable it run this script with -no-ccache\033[0;0m\n"
-  else
-    echo -e "\033[0;31m> NOT using ccache, to enable it run this script without -no-ccache\033[0;0m\n"
-  fi
-else
-  echo -e "\033[0;33m> [Optional] ccache not installed. You can install it (in ubuntu) using 'sudo apt-get install ccache'\033[0;0m\n"
-fi
-
-# Are we using ccache?
-if [ -n "$USE_CCACHE" ]
-then
-  export CROSS_COMPILE="ccache $PRECROSSCOMPILE"
-fi
-
 # build starts here
 cd $SEMAPHORE_PROJECT_DIR
 
@@ -200,16 +163,16 @@ cd $SEMAPHORE_PROJECT_DIR
 # make your kernel
 if [[ $GITBRANCH == clang ]]; then
   start=$SECONDS
-  echo -e "\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
+  echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
   $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
 
-  PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
+  PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}"
   make -j$(nproc --all) O=$OUT_DIR \
                         ARCH=$ARCH \
                         SUBARCH=$SUBARCH \
                         CC=$CC \
-                        CROSS_COMPILE=$CROSS_COMPILE \
-                        CLANG_TRIPLE=$CLANGTRIPLE
+                        CLANG_TRIPLE=$CLANGTRIPLE \
+                        CROSS_COMPILE=$CROSS_COMPILE 
 
 elif [[ $GITBRANCH == miui ]]; then
   start=$SECONDS
@@ -320,7 +283,7 @@ then
 # final push to telegram
 curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
 $url
-$ZIP_NAME" https://api.telegram.org/bot$BOT_API_KEY/sendDocument 
+$ZIP_NAME" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
 ⚙️ $KERNEL_NAME CI build successful 
