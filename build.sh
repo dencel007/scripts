@@ -69,7 +69,7 @@ export ZIP_DIR=${SEMAPHORE_PROJECT_DIR}/AnyKernel2
 export OUT_DIR=${SEMAPHORE_PROJECT_DIR}/out
 
 # zip related stuff
-export ZIP_NAME="${KERNEL_NAME}-${OSVERSION}-${MAKETYPE}-${DEVICE}-$(date +%Y%m%d-%H%M).zip";
+export ZIP_NAME="${KERNEL_NAME}_${OSVERSION}_${MAKETYPE}_${DEVICE}_$(date +%Y%m%d-%H%M).zip";
 export FINAL_ZIP=$ZIP_DIR/${ZIP_NAME}
 export IMAGE_OUT=$OUT_DIR/arch/arm64/boot/Image.gz-dtb
 
@@ -166,7 +166,7 @@ if [[ $GITBRANCH == clang ]]; then
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
   $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
 
-  PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}"
+  PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
                         ARCH=$ARCH \
                         SUBARCH=$SUBARCH \
@@ -178,15 +178,15 @@ elif [[ $GITBRANCH == miui ]]; then
   start=$SECONDS
   echo -e "\033[0;35m> starting MIUI kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
-  ARCH=$ARCH SUBARCH=$SUBARCH CROSS_COMPILE=$CROSS_COMPILE
+  export ARCH=$ARCH && export SUBARCH=$SUBARCH && export CROSS_COMPILE=$CROSS_COMPILE
   $MAKE $DEFCONFIG
-  $MAKE -j$(nproc --all) | tee build-log.txt ;
   $MAKE modules
+  $MAKE -j$(nproc --all) | tee build-log.txt ;
 else
   start=$SECONDS
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
-  ARCH=$ARCH SUBARCH=$SUBARCH CROSS_COMPILE=$CROSS_COMPILE
+  export ARCH=$ARCH && export SUBARCH=$SUBARCH && export CROSS_COMPILE=$CROSS_COMPILE
   $MAKE $DEFCONFIG
   $MAKE -j$(nproc --all) | tee build-log.txt ;
 fi
@@ -282,11 +282,11 @@ then
 
 # final push to telegram
 curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
-$url
-$ZIP_NAME" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
+name: ${KERNEL_NAME}_${OSVERSION}_${MAKETYPE}_${DEVICE}_$(date +%Y%m%d-%H%M)
+download link: $url" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
-⚙️ $KERNEL_NAME CI build successful 
+⚙️ name : $KERNEL_NAME kernel
 📕 branch : $BRANCH_NAME
 🔰 linux-version : $KERNEL_VERSION
 🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
