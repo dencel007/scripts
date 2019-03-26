@@ -26,9 +26,15 @@ semaphoreci.com v1.0 (semaphore 2.0 is another story) is the only host which sup
 
 `bash build.sh `(execute it)
 
-add `-gcc8` in the bash command 
-eg : `bash build.sh -gcc8` 
-to change between the toolchains
+## extras :
+
+add `-gcc8` in the bash command to change between the toolchains
+
+- eg : `bash build.sh -gcc8`
+
+add `-clang` in the bash command to manually build with clang toolchain
+
+- eg : `bash build.sh -clang`
 
 # basic requirements :
 1. basic linux and kernel building knowledge
