@@ -22,7 +22,7 @@ export SUBARCH=arm64;
 export DEFCONFIG=santoni_defconfig;
 
 # identify git branchname
-if [[ $BRANCH_NAME == *clang* ]]; then
+if [[ $BRANCH_NAME == *clang* || "$*" == *"-clang"* ]]; then
   export GITBRANCH=clang
   echo -e "\033[0;91m> current git branch = CLANG \033[0m\n"
 elif [[ $BRANCH_NAME == *miui* ]]; then
@@ -35,10 +35,10 @@ fi
 
 # identify os type
 if [[ $BRANCH_NAME == *miui* ]]; then
-  export OSTYPE=miui
+  export OSTYPE=MIUI
   echo -e "\033[0;91m> building for android = MIUI \033[0m\n"
 else
-  export OSTYPE=aosp
+  export OSTYPE=AOSP
   echo -e "\033[0;91m> building for android  = AOSP \033[0m\n"
 fi
 
@@ -181,7 +181,7 @@ if [[ $GITBRANCH == clang ]]; then
                         SUBARCH=$SUBARCH \
                         CC=$CC \
                         CLANG_TRIPLE=$CLANGTRIPLE \
-                        CROSS_COMPILE=$CROSS_COMPILE 
+                        CROSS_COMPILE=$CROSS_COMPILE
 
 elif [[ $GITBRANCH == miui ]]; then
   start=$SECONDS
@@ -226,7 +226,7 @@ fi
 
 # get current kernel makefile version
 KERNEL_VERSION=$(head -n3 Makefile | sed -E 's/.*(^\w+\s[=]\s)//g' | xargs | sed -E 's/(\s)/./g')
-echo -e "\033[0;36m> packing kernel v$KERNEL_VERSION $ZIP_NAME \033[0;0m\n" 
+echo -e "\033[0;36m> packing ${KERNEL_NAME}.${DEVICE}.${OSTYPE}.${OSVERSION} kernel v$KERNEL_VERSION  \033[0;0m\n"
 
 end=$SECONDS
 duration=$(( end - start ))
@@ -302,7 +302,7 @@ curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
 🔰 linux-version : $KERNEL_VERSION
 🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
 
-toolchain : 
+toolchain :
 $TC_TYPE
 
 last commit :
