@@ -24,7 +24,7 @@ export DEFCONFIG=santoni_defconfig;
 # identify git branchname
 if [[ $BRANCH_NAME == *clang* ]]; then
   export GITBRANCH=clang
-  echo -e "\033[0;91m> current git branch = clang \033[0m\n"
+  echo -e "\033[0;91m> current git branch = CLANG \033[0m\n"
 elif [[ $BRANCH_NAME == *miui* ]]; then
   export GITBRANCH=miui
   echo -e "\033[0;91m> current git branch = MIUI \033[0m\n"
@@ -34,6 +34,15 @@ else
 fi
 
 # identify os type
+if [[ $BRANCH_NAME == *miui* ]]; then
+  export OSTYPE=miui
+  echo -e "\033[0;91m> building for android = MIUI \033[0m\n"
+else
+  export OSTYPE=aosp
+  echo -e "\033[0;91m> building for android  = AOSP \033[0m\n"
+fi
+
+# identify os version
 if [[ $BRANCH_NAME == *pie* ]]; then
   export OSVERSION=P
   echo -e "\033[0;91m> building for android = P \033[0m\n"
@@ -69,7 +78,7 @@ export ZIP_DIR=${SEMAPHORE_PROJECT_DIR}/AnyKernel2
 export OUT_DIR=${SEMAPHORE_PROJECT_DIR}/out
 
 # zip related stuff
-export ZIP_NAME="${KERNEL_NAME}_${OSVERSION}_${MAKETYPE}_${DEVICE}_$(date +%Y%m%d-%H%M).zip";
+export ZIP_NAME="${KERNEL_NAME}.${DEVICE}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M).zip";
 export FINAL_ZIP=$ZIP_DIR/${ZIP_NAME}
 export IMAGE_OUT=$OUT_DIR/arch/arm64/boot/Image.gz-dtb
 
@@ -228,7 +237,8 @@ cd $SEMAPHORE_PROJECT_DIR
 
 # modules directory config
 if [[ $GITBRANCH == miui ]]; then
-export MODULES_DIR=${SEMAPHORE_PROJECT_DIR}/modules
+export MODULES_DIR=${SEMAPHORE_PROJECT_DIR}/modules/system/lib/modules
+export ZIPMODULES_DIR=${ZIP_DIR}/modules
   if [[ -d $MODULES_DIR ]]; then
     echo -e "\n cleaning old modules folder \n"
     rm -rf $MODULES_DIR
@@ -241,19 +251,20 @@ fi
 # modules setup starts for miui
 if [[ $GITBRANCH == miui ]]; then
 
-  find . -name '*.ko' -exec cp {} $MODULES_DIR/ \;
+  find -name "*.ko" -exec mv {} $MODULES_DIR \;
 
-  sudo chmod 755 $MODULES_DIR/*
+  sudo chmod -R 755 $MODULES_DIR/*
 
   "$CROSS_COMPILE"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
   "$CROSS_COMPILE"strip --strip-debug $MODULES_DIR/* 2>/dev/null
 
-  mkdir -p $ZIP_DIR/modules
-  rm -r $ZIP_DIR/modules/*.ko
-  rm -r $ZIP_DIR/modules/pronto
-  cp -f $MODULES_DIR/*.ko $ZIP_DIR/modules/
-  mkdir -p $ZIP_DIR/modules/pronto
-  cp -f $ZIP_DIR/modules/wlan.ko $ZIP_DIR/modules/pronto/pronto_wlan.ko
+  mkdir -p $ZIPMODULES_DIR/system/lib/modules
+  sudo chmod -R 755 $ZIPMODULES_DIR/*
+  rm -r $ZIPMODULES_DIR/system/lib/modules*.ko
+  rm -r $ZIPMODULES_DIR/system/lib/modules/pronto
+  cp -f $MODULES_DIR/*.ko $ZIPMODULES_DIR/system/lib/modules
+  mkdir -p $ZIPMODULES_DIR/system/lib/modules/pronto
+  cp -f $ZIPMODULES_DIR/system/lib/modules/wlan.ko $ZIPMODULES_DIR/system/lib/modules/pronto/pronto_wlan.ko
 
 fi
 
@@ -282,8 +293,8 @@ then
 
 # final push to telegram
 curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
-name: ${KERNEL_NAME}_${OSVERSION}_${MAKETYPE}_${DEVICE}_$(date +%Y%m%d-%H%M)
-download link: $url" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
+name : ${KERNEL_NAME}.${DEVICE}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M)
+$url" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
 ⚙️ name : $KERNEL_NAME kernel
