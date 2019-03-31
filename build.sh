@@ -67,8 +67,8 @@ fi
 export KERNEL_WORKING_DIR=$(dirname "$(pwd)")
 
 # directories - read n' understand the paths, u dumbass !
-if [[ "$*" == *"-gcc8"* ]]; then
-  export GCCDIR=${HOME}/gcc-arm-host-linux-x86
+if [[ "$*" == *-gcc8* || "$*" == *-gcc9* ]]; then
+  export GCCDIR=${HOME}/gcc-host-linux-x86
 else
   export GCCDIR=${HOME}/prebuilts-gcc-host-linux-x86
 fi
@@ -92,7 +92,7 @@ export MAKE="make O=${OUT_DIR}";
 export CC=$CLANGDIR/bin/clang
 export CLANGTRIPLE=aarch64-linux-gnu-
 
-if [[ "$*" == *-gcc8* ]]; then
+if [[ "$*" == *-gcc8* || "$*" == *-gcc9* ]]; then
   export TCPREFIX=aarch64-linux-gnu-
 else
   export TCPREFIX=aarch64-linux-android-
@@ -124,7 +124,12 @@ if [[ "$*" == *"-gcc8"* ]]; then
   if [[ -d $HOME/gcc-arm-host-linux-x86 ]]; then
     rm -rf $HOME/prebuilts-gcc-host-linux-x86
   fi
-  git clone https://github.com/VRanger/aarch64-linux-gnu/ -b gnu-8.x $HOME/gcc-arm-host-linux-x86 --depth=1
+  git clone https://github.com/VRanger/aarch64-linux-gnu/ -b gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
+elif [[ "$*" == *"-gcc9"* ]]; then
+  if [[ -d $HOME/gcc-arm-host-linux-x86 ]]; then
+    rm -rf $HOME/prebuilts-gcc-host-linux-x86
+  fi
+  git clone https://github.com/VRanger/aarch64-linux-gnu/ -b gnu-9.x $HOME/gcc-host-linux-x86 --depth=1
 else
   # get prebuilts google gcc compiler
   if [[ -d $HOME/prebuilts-gcc-host-linux-x86 ]]; then
