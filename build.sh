@@ -99,8 +99,8 @@ export MAKE="make O=${OUT_DIR}";
 # don't forget to specify the prefix. Mine is: aarch64-linux-android-
 export CC=$CLANGDIR/bin/clang
 export CLANGTRIPLE=aarch64-linux-gnu-
-export DTCDIR=${HOME}/dtc-clang-host-linux-x86
-export LLVM_DIS=${HOME}/clang-host-linux-x86/bin/llvm-dis
+export CLANG_LD_PATH=${HOME}/dtc-clang-host-linux-x86/clang/lib
+export LLVM_DIS=${HOME}/dtc-clang-host-linux-x86/bin/llvm-dis
 
 if [[ "$*" == *-gcc8* || "$*" == *-gcc9* ]]; then
   export TCPREFIX=aarch64-linux-gnu-
@@ -154,20 +154,21 @@ echo -e "\033[0;31m\n$GCCVERSION ready to compile ! \033[0;0m\n"
 
 # get google clang toolchain
 if [[ $GITBRANCH == dtc ]]; then
+  if [[ -d $HOME/dtc-clang-host-linux-x86 ]]; then
+    rm -rf $HOME/dtc-clang-host-linux-x86
+  fi
   git clone https://github.com/VRanger/dragontc $HOME/dtc-clang-host-linux-x86 --depth=1
-  git clone https://github.com/VRanger/clang $HOME/clang-host-linux-x86 --depth=1
-fi
+
 elif [[ $GITBRANCH == clang ]]; then
 	if [[ -d $HOME/prebuilts-clang-host-linux-x86 ]]; then
 		rm -rf $HOME/prebuilts-clang-host-linux-x86
 	fi
 	git clone https://github.com/dencel007/prebuilts-clang-host-linux-x86 $HOME/prebuilts-clang-host-linux-x86 --depth=1
-
-	# get clang version - @infinity-plus
-	export CLANGVERSION=$($CLANGDIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
-	echo -e "\033[0;31m\n$CLANGVERSION ready to compile ! \033[0;0m\n"
 fi
 
+# get clang version - @infinity-plus
+export CLANGVERSION=$($CLANGDIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+echo -e "\033[0;31m\n$CLANGVERSION ready to compile ! \033[0;0m\n"
 
 
 # get anykernel2 for TWRP flashing, got something else ? PM me plox
@@ -215,9 +216,8 @@ elif [[ $GITBRANCH == dtc ]]; then
                         SUBARCH=$SUBARCH \
                         CC=$CC \
                         CLANG_TRIPLE=$CLANGTRIPLE \
-                        CLANG_LD_PATH=$DTCDIR \
-                        LLVM_DIS=$LLVM_DIS \
-                        CROSS_COMPILE=$CROSS_COMPILE
+                        CLANG_LD_PATH=$CLANG_LD_PATH \
+                        LLVM_DIS=$LLVM_DIS
 
 elif [[ $GITBRANCH == miui ]]; then
   start=$SECONDS
