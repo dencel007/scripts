@@ -182,6 +182,8 @@ fi
 
 # sets CCACHE path
 echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc && source ~/.bashrc && echo $PATH
+export USE_CCACHE=1
+ccache -M 6G
 
 # build starts here
 cd $SEMAPHORE_PROJECT_DIR
