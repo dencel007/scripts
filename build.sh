@@ -87,6 +87,7 @@ export OUT_DIR=${SEMAPHORE_PROJECT_DIR}/out
 
 # zip related stuff
 export ZIP_NAME="${KERNEL_NAME}.${DEVICE}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M).zip";
+export FINAL_NAME="${KERNEL_NAME}.${DEVICE}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M)"; 
 export FINAL_ZIP=$ZIP_DIR/${ZIP_NAME}
 export IMAGE_OUT=$OUT_DIR/arch/arm64/boot/Image.gz-dtb
 
@@ -331,7 +332,7 @@ then
 
 # final push to telegram
 curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
-name : ${KERNEL_NAME}.${DEVICE}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M)
+name : $FINAL_NAME
 $url" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
