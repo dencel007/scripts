@@ -25,6 +25,9 @@ export DEFCONFIG=santoni_defconfig;
 if [[ $BRANCH_NAME == *clang* || "$*" == *"-clang"* ]]; then
   export GITBRANCH=clang
   echo -e "\033[0;91m> current git branch = CLANG \033[0m\n"
+elif [[ $BRANCH_NAME == *dtc* || "$*" == *"-dtc"* ]]; then
+  export GITBRANCH=dtc
+  echo -e "\033[0;91m> current git branch = DTC CLANG \033[0m\n"
 elif [[ $BRANCH_NAME == *miui* ]]; then
   export GITBRANCH=miui
   echo -e "\033[0;91m> current git branch = MIUI \033[0m\n"
@@ -73,7 +76,12 @@ else
   export GCCDIR=${HOME}/prebuilts-gcc-host-linux-x86
 fi
 
-export CLANGDIR=${HOME}/prebuilts-clang-host-linux-x86
+if [[ $GITBRANCH == dtc ]]; then
+  export CLANGDIR=${HOME}/dtc-clang-host-linux-x86
+else
+  export CLANGDIR=${HOME}/prebuilts-clang-host-linux-x86
+fi
+
 export ZIP_DIR=${SEMAPHORE_PROJECT_DIR}/AnyKernel2
 export OUT_DIR=${SEMAPHORE_PROJECT_DIR}/out
 
@@ -91,6 +99,8 @@ export MAKE="make O=${OUT_DIR}";
 # don't forget to specify the prefix. Mine is: aarch64-linux-android-
 export CC=$CLANGDIR/bin/clang
 export CLANGTRIPLE=aarch64-linux-gnu-
+export DTCDIR=${HOME}/dtc-clang-host-linux-x86
+export LLVM_DIS=${HOME}/clang-host-linux-x86/bin/llvm-dis
 
 if [[ "$*" == *-gcc8* || "$*" == *-gcc9* ]]; then
   export TCPREFIX=aarch64-linux-gnu-
@@ -143,7 +153,11 @@ export GCCVERSION=$($GCCDIR/bin/*-gcc --version | head -n 1 | perl -pe 's/\(http
 echo -e "\033[0;31m\n$GCCVERSION ready to compile ! \033[0;0m\n"
 
 # get google clang toolchain
-if [[ $GITBRANCH == clang ]]; then
+if [[ $GITBRANCH == dtc ]]; then
+  git clone https://github.com/VRanger/dragontc $HOME/dtc-clang-host-linux-x86 --depth=1
+  git clone https://github.com/VRanger/clang $HOME/clang-host-linux-x86 --depth=1
+fi
+elif [[ $GITBRANCH == clang ]]; then
 	if [[ -d $HOME/prebuilts-clang-host-linux-x86 ]]; then
 		rm -rf $HOME/prebuilts-clang-host-linux-x86
 	fi
@@ -153,6 +167,8 @@ if [[ $GITBRANCH == clang ]]; then
 	export CLANGVERSION=$($CLANGDIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 	echo -e "\033[0;31m\n$CLANGVERSION ready to compile ! \033[0;0m\n"
 fi
+
+
 
 # get anykernel2 for TWRP flashing, got something else ? PM me plox
 if [[ $GITBRANCH == miui ]]; then
@@ -186,6 +202,21 @@ if [[ $GITBRANCH == clang ]]; then
                         SUBARCH=$SUBARCH \
                         CC=$CC \
                         CLANG_TRIPLE=$CLANGTRIPLE \
+                        CROSS_COMPILE=$CROSS_COMPILE
+
+elif [[ $GITBRANCH == dtc ]]; then
+  start=$SECONDS
+  echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
+  $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
+
+  PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
+  make -j$(nproc --all) O=$OUT_DIR \
+                        ARCH=$ARCH \
+                        SUBARCH=$SUBARCH \
+                        CC=$CC \
+                        CLANG_TRIPLE=$CLANGTRIPLE \
+                        CLANG_LD_PATH=$DTCDIR \
+                        LLVM_DIS=$LLVM_DIS \
                         CROSS_COMPILE=$CROSS_COMPILE
 
 elif [[ $GITBRANCH == miui ]]; then
