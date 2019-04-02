@@ -214,10 +214,39 @@ if [[ $GITBRANCH == clang ]]; then
                         CLANG_TRIPLE=$CLANGTRIPLE \
                         CROSS_COMPILE=$CROSS_COMPILE
 
+elif [[ "$*" == *"-clang"* && $GITBRANCH == miui ]]; then
+  start=$SECONDS
+  echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
+  $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
+  $MAKE modules CC=$CC CLANG_TRIPLE=$CROSS_COMPILE
+
+  PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
+  make -j$(nproc --all) O=$OUT_DIR \
+                        ARCH=$ARCH \
+                        SUBARCH=$SUBARCH \
+                        CC=$CC \
+                        CLANG_TRIPLE=$CLANGTRIPLE \
+                        CROSS_COMPILE=$CROSS_COMPILE
+
 elif [[ $GITBRANCH == dtc ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
   $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
+
+  PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
+  make -j$(nproc --all) O=$OUT_DIR \
+                        ARCH=$ARCH \
+                        SUBARCH=$SUBARCH \
+                        CC=$CC \
+                        CLANG_TRIPLE=$CLANGTRIPLE \
+                        CLANG_LD_PATH=$CLANG_LD_PATH \
+                        LLVM_DIS=$LLVM_DIS
+
+elif [[ "$*" == *"-dtc"* && $GITBRANCH == miui ]]; then
+  start=$SECONDS
+  echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
+  $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
+  $MAKE modules CC=$CC CLANG_TRIPLE=$CROSS_COMPILE
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
