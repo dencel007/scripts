@@ -165,12 +165,11 @@ elif [[ $GITBRANCH == clang ]]; then
 		rm -rf $HOME/prebuilts-clang-host-linux-x86
 	fi
 	git clone https://github.com/dencel007/prebuilts-clang-host-linux-x86 $HOME/prebuilts-clang-host-linux-x86 --depth=1
-fi
 
 # get clang version - @infinity-plus
 export CLANGVERSION=$($CLANGDIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 echo -e "\033[0;31m\n$CLANGVERSION ready to compile ! \033[0;0m\n"
-
+fi
 
 # get anykernel2 for TWRP flashing, got something else ? PM me plox
 if [[ $GITBRANCH == miui ]]; then
@@ -181,8 +180,15 @@ else
 	git clone https://github.com/dencel007/AnyKernel2 -b santoni-main ${ZIP_DIR} --depth=1
 fi
 
-# sets CCACHE path
-echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc && source ~/.bashrc && echo $PATH
+# Update symlinks
+sudo /usr/sbin/update-ccache-symlinks
+
+# Prepend ccache into the PATH
+echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc
+
+# Source bashrc to test the new PATH
+source ~/.bashrc && echo $PATH
+
 export USE_CCACHE=1
 ccache -M 6G
 
