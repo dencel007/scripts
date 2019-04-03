@@ -217,8 +217,8 @@ if [[ $GITBRANCH == clang ]]; then
 elif [[ "$*" == *"-clang"* && $GITBRANCH == miui ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  $MAKE ARCH=$ARCH $DEFCONFIGK | tee build-log.txt ;
   $MAKE modules CC=$CCK CLANG_TRIPLE=$CROSS_COMPILEK
+  $MAKE ARCH=$ARCH $DEFCONFIGK | tee build-log.txt ;
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
