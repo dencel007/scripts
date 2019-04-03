@@ -19,7 +19,7 @@ export KBUILD_BUILD_HOST="Zeus"
 export DEVICE=HM4X;
 export ARCH=arm64;
 export SUBARCH=arm64;
-export DEFCONFIG=santoni_defconfig;
+export DEFCONFIGK=santoni_defconfig;
 
 # identify git branchname
 if [[ $BRANCH_NAME == *clang* || "$*" == *"-clang"* ]]; then
@@ -98,10 +98,10 @@ export MAKE="make O=${OUT_DIR}";
 # ==================================
 # point CROSS_COMPILE to the folder of the desired toolchain
 # don't forget to specify the prefix. Mine is: aarch64-linux-android-
-export CC=$CLANGDIR/bin/clang
-export CLANGTRIPLE=aarch64-linux-gnu-
-export CLANG_LD_PATH=${HOME}/dtc-clang-host-linux-x86/clang/lib
-export LLVM_DIS=${HOME}/dtc-clang-host-linux-x86/bin/llvm-dis
+export CCK=$CLANGDIR/bin/clang
+export CLANGTRIPLEK=aarch64-linux-gnu-
+export CLANG_LD_PATHK=${HOME}/dtc-clang-host-linux-x86/clang/lib
+export LLVM_DISK=${HOME}/dtc-clang-host-linux-x86/bin/llvm-dis
 
 if [[ "$*" == *-gcc8* || "$*" == *-gcc9* ]]; then
   export TCPREFIX=aarch64-linux-gnu-
@@ -109,7 +109,7 @@ else
   export TCPREFIX=aarch64-linux-android-
 fi
 
-export CROSS_COMPILE=$GCCDIR/bin/$TCPREFIX
+export CROSS_COMPILEK=$GCCDIR/bin/$TCPREFIX
 
 # functions - @infinity-plus
 function sendlog {
@@ -204,73 +204,73 @@ cd $SEMAPHORE_PROJECT_DIR
 if [[ $GITBRANCH == clang ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
+  $MAKE ARCH=$ARCH $DEFCONFIGK | tee build-log.txt ;
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
                         ARCH=$ARCH \
                         SUBARCH=$SUBARCH \
-                        CC=$CC \
-                        CLANG_TRIPLE=$CLANGTRIPLE \
-                        CROSS_COMPILE=$CROSS_COMPILE
+                        CC=$CCK \
+                        CLANG_TRIPLE=$CLANGTRIPLEK \
+                        CROSS_COMPILE=$CROSS_COMPILEK
 
 elif [[ "$*" == *"-clang"* && $GITBRANCH == miui ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
-  $MAKE modules CC=$CC CLANG_TRIPLE=$CROSS_COMPILE
+  $MAKE ARCH=$ARCH $DEFCONFIGK | tee build-log.txt ;
+  $MAKE modules CC=$CCK CLANG_TRIPLE=$CROSS_COMPILEK
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
                         ARCH=$ARCH \
                         SUBARCH=$SUBARCH \
-                        CC=$CC \
-                        CLANG_TRIPLE=$CLANGTRIPLE \
-                        CROSS_COMPILE=$CROSS_COMPILE
+                        CC=$CCK \
+                        CLANG_TRIPLE=$CLANGTRIPLEK \
+                        CROSS_COMPILE=$CROSS_COMPILEK
 
 elif [[ $GITBRANCH == dtc ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
+  $MAKE ARCH=$ARCH $DEFCONFIGK | tee build-log.txt ;
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
                         ARCH=$ARCH \
                         SUBARCH=$SUBARCH \
-                        CC=$CC \
-                        CLANG_TRIPLE=$CLANGTRIPLE \
-                        CLANG_LD_PATH=$CLANG_LD_PATH \
-                        LLVM_DIS=$LLVM_DIS
+                        CC=$CCK \
+                        CLANG_TRIPLE=$CLANGTRIPLEK \
+                        CLANG_LD_PATH=$CLANG_LD_PATHK \
+                        LLVM_DIS=$LLVM_DISK
 
 elif [[ "$*" == *"-dtc"* && $GITBRANCH == miui ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  $MAKE ARCH=$ARCH $DEFCONFIG | tee build-log.txt ;
-  $MAKE modules CC=$CC CLANG_TRIPLE=$CROSS_COMPILE
+  $MAKE ARCH=$ARCH $DEFCONFIGK
+  $MAKE modules CC=$CCK CLANG_TRIPLE=$CROSS_COMPILEK | tee build-log.txt ;
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
                         ARCH=$ARCH \
                         SUBARCH=$SUBARCH \
-                        CC=$CC \
-                        CLANG_TRIPLE=$CLANGTRIPLE \
-                        CLANG_LD_PATH=$CLANG_LD_PATH \
-                        LLVM_DIS=$LLVM_DIS
+                        CC=$CCK \
+                        CLANG_TRIPLE=$CLANGTRIPLEK \
+                        CLANG_LD_PATH=$CLANG_LD_PATHK \
+                        LLVM_DIS=$LLVM_DISK
 
 elif [[ $GITBRANCH == miui ]]; then
   start=$SECONDS
   echo -e "\033[0;35m> starting MIUI kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
-  export ARCH=$ARCH && export SUBARCH=$SUBARCH && export CROSS_COMPILE=$CROSS_COMPILE
-  $MAKE $DEFCONFIG
+  export ARCH=$ARCH && export SUBARCH=$SUBARCH && export CROSS_COMPILE=$CROSS_COMPILEK
+  $MAKE $DEFCONFIGK
   $MAKE modules
   $MAKE -j$(nproc --all) | tee build-log.txt ;
 else
   start=$SECONDS
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
-  export ARCH=$ARCH && export SUBARCH=$SUBARCH && export CROSS_COMPILE=$CROSS_COMPILE
-  $MAKE $DEFCONFIG
+  export ARCH=$ARCH && export SUBARCH=$SUBARCH && export CROSS_COMPILE=$CROSS_COMPILEK
+  $MAKE $DEFCONFIGK
   $MAKE -j$(nproc --all) | tee build-log.txt ;
 fi
 
