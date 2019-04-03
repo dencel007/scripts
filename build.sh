@@ -200,6 +200,13 @@ cd $SEMAPHORE_PROJECT_DIR
   rm -rf $OUT_DIR;
 	mkdir -p $OUT_DIR;
 
+KCFLAGS="-Wno-asm-operand-widths -Wno-unknown-warning-option -Wno-strict-prototypes -Wno-implicit-function-declaration \
+-Wno-incompatible-pointer-types -Wno-sometimes-uninitialized -Wno-vectorizer-no-neon -Wno-pointer-sign -Wno-sometimes-uninitialized \
+-Wno-tautological-constant-out-of-range-compare -Wno-literal-conversion -Wno-enum-conversion -Wno-parentheses-equality \
+-Wno-typedef-redefinition -Wno-constant-logical-operand -Wno-array-bounds -Wno-empty-body -Wno-non-literal-null-conversion \
+-Wno-shift-overflow -Wno-logical-not-parentheses -Wno-strlcpy-strlcat-size -Wno-section -Wno-stringop-truncation -Wno-return-stack-address \
+-mtune=cortex-a53 -march=armv8-a+crc+simd+crypto -mcpu=cortex-a53 -O3"
+
 # make your kernel
 if [[ $GITBRANCH == clang ]]; then
   start=$SECONDS
@@ -255,7 +262,8 @@ elif [[ "$*" == *"-dtc"* && $GITBRANCH == miui ]]; then
                         CC=$CCK \
                         CLANG_TRIPLE=$CLANGTRIPLEK \
                         CLANG_LD_PATH=$CLANG_LD_PATHK \
-                        LLVM_DIS=$LLVM_DISK
+                        LLVM_DIS=$LLVM_DISK \
+                        KCFLAGS=$KCFLAGS
 
 elif [[ $GITBRANCH == miui ]]; then
   start=$SECONDS
