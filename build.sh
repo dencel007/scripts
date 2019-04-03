@@ -2,7 +2,7 @@
 export TZ="Asia/Kolkata";
 
 # make more room in the environment
-sudo rm -rf ~/.rbenv ~/.phpbrew
+# sudo rm -rf ~/.rbenv ~/.phpbrew
 
 # predefined variables - https://semaphoreci.com/docs/available-environment-variables.html
 cd $SEMAPHORE_PROJECT_DIR
