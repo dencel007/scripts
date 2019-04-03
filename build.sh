@@ -164,7 +164,7 @@ elif [[ $GITBRANCH == clang ]]; then
 	if [[ -d $HOME/prebuilts-clang-host-linux-x86 ]]; then
 		rm -rf $HOME/prebuilts-clang-host-linux-x86
 	fi
-	git clone https://github.com/dencel007/prebuilts-clang-host-linux-x86 $HOME/prebuilts-clang-host-linux-x86 --depth=1
+	git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5407736 $HOME/prebuilts-clang-host-linux-x86 --depth=1
 
 # get clang version - @infinity-plus
 export CLANGVERSION=$($CLANGDIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
