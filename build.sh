@@ -103,7 +103,7 @@ export CLANGTRIPLEK=aarch64-linux-gnu-
 export CLANG_LD_PATHK=${HOME}/dtc-clang-host-linux-x86/clang/lib
 export LLVM_DISK=${HOME}/dtc-clang-host-linux-x86/bin/llvm-dis
 
-if [[ "$*" == *-gcc8* || "$*" == *-gcc9* ]]; then
+if [[ "$*" == *-gcc8* || "$*" == *-gcc9* || "$*" == *-linaro4* || "$*" == *-linaro7*  ]]; then
   export TCPREFIX=aarch64-linux-gnu-
 else
   export TCPREFIX=aarch64-linux-android-
@@ -133,15 +133,25 @@ function transfer() {
 install-package jq ccache bc libncurses5-dev git-core gnupg flex bison gperf build-essential zip curl libc6-dev ncurses-dev
 
 if [[ "$*" == *"-gcc8"* ]]; then
-  if [[ -d $HOME/gcc-arm-host-linux-x86 ]]; then
-    rm -rf $HOME/prebuilts-gcc-host-linux-x86
+  if [[ -d $HOME/gcc-host-linux-x86 ]]; then
+    rm -rf $HOME/gcc-host-linux-x86
   fi
   git clone https://github.com/RaphielGang/aarch64-linux-gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
 elif [[ "$*" == *"-gcc9"* ]]; then
-  if [[ -d $HOME/gcc-arm-host-linux-x86 ]]; then
-    rm -rf $HOME/prebuilts-gcc-host-linux-x86
+  if [[ -d $HOME/gcc-host-linux-x86 ]]; then
+    rm -rf $HOME/gcc-host-linux-x86
   fi
   git clone https://github.com/VRanger/aarch64-linux-gnu/ -b gnu-9.x $HOME/gcc-host-linux-x86 --depth=1
+elif [[ "$*" == *"-linaro7"* ]]; then
+  if [[ -d $HOME/gcc-host-linux-x86 ]]; then
+    rm -rf $HOME/gcc-host-linux-x86
+  fi
+  git clone https://github.com/teamfirangi/linaro-7.3 $HOME/gcc-host-linux-x86 --depth=1
+elif [[ "$*" == *"-linaro4"* ]]; then
+  if [[ -d $HOME/gcc-host-linux-x86 ]]; then
+    rm -rf $HOME/gcc-host-linux-x86
+  fi
+  git clone https://github.com/ryan-andri/aarch64-linaro-linux-gnu-4.9 $HOME/gcc-host-linux-x86 --depth=1
 else
   # get prebuilts google gcc compiler
   if [[ -d $HOME/prebuilts-gcc-host-linux-x86 ]]; then
@@ -200,13 +210,6 @@ cd $SEMAPHORE_PROJECT_DIR
 # http://bit.ly/2UQv06H - read thoroughly
   rm -rf $OUT_DIR;
 	mkdir -p $OUT_DIR;
-
-KCFLAGS="-Wno-asm-operand-widths -Wno-unknown-warning-option -Wno-strict-prototypes -Wno-implicit-function-declaration \
--Wno-incompatible-pointer-types -Wno-sometimes-uninitialized -Wno-vectorizer-no-neon -Wno-pointer-sign -Wno-sometimes-uninitialized \
--Wno-tautological-constant-out-of-range-compare -Wno-literal-conversion -Wno-enum-conversion -Wno-parentheses-equality \
--Wno-typedef-redefinition -Wno-constant-logical-operand -Wno-array-bounds -Wno-empty-body -Wno-non-literal-null-conversion \
--Wno-shift-overflow -Wno-logical-not-parentheses -Wno-strlcpy-strlcat-size -Wno-section -Wno-stringop-truncation -Wno-return-stack-address \
--mtune=cortex-a53 -march=armv8-a+crc+simd+crypto -mcpu=cortex-a53 -O3"
 
 # make your kernel
 if [[ $GITBRANCH == clang ]]; then
