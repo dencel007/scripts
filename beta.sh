@@ -129,7 +129,7 @@ echo -e "\033[0;31m\n$GCCVERSION ready to compile ! \033[0;0m\n"
 # get google clang toolchain
 if [[ $GITBRANCH == dtc ]]; then
   git clone https://github.com/VRanger/dragontc $HOME/clang-host-linux-x86 --depth=1
-else [[ $GITBRANCH == clang ]]; then
+elif [[ $GITBRANCH == clang ]]; then
 	git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5407736 $HOME/clang-host-linux-x86 --depth=1
 
 # get clang version - @infinity-plus
