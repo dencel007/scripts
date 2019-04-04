@@ -129,13 +129,14 @@ function transfer() {
 }
 
 # build environment setup - fcuk, i won't credit this to anyone !
-sudo apt-get install -y build-essential libncurses5-dev bzip2 bc ccache git-core
+# sudo apt-get install -y build-essential libncurses5-dev bzip2 bc ccache git-core
+install-package jq ccache bc libncurses5-dev git-core gnupg flex bison gperf build-essential zip curl libc6-dev ncurses-dev
 
 if [[ "$*" == *"-gcc8"* ]]; then
   if [[ -d $HOME/gcc-arm-host-linux-x86 ]]; then
     rm -rf $HOME/prebuilts-gcc-host-linux-x86
   fi
-  git clone https://github.com/VRanger/aarch64-linux-gnu/ -b gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
+  git clone https://github.com/RaphielGang/aarch64-linux-gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
 elif [[ "$*" == *"-gcc9"* ]]; then
   if [[ -d $HOME/gcc-arm-host-linux-x86 ]]; then
     rm -rf $HOME/prebuilts-gcc-host-linux-x86
@@ -219,13 +220,14 @@ if [[ $GITBRANCH == clang ]]; then
                         SUBARCH=$SUBARCH \
                         CC=$CCK \
                         CLANG_TRIPLE=$CLANGTRIPLEK \
-                        CROSS_COMPILE=$CROSS_COMPILEK
+                        CROSS_COMPILE=$CROSS_COMPILEK \
+                        KCFLAGS="$KCFLAGS" | tee build-log.txt ;
 
 elif [[ "$*" == *"-clang"* && $GITBRANCH == miui ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  $MAKE modules CC=$CCK CLANG_TRIPLE=$CROSS_COMPILEK
-  $MAKE ARCH=$ARCH $DEFCONFIGK | tee build-log.txt ;
+  $MAKE ARCH=$ARCH $DEFCONFIGK
+  $MAKE modules CC=$CCK CLANG_TRIPLE=$CROSS_COMPILEK KCFLAGS="$KCFLAGS" | tee build-log.txt ;
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
@@ -233,7 +235,8 @@ elif [[ "$*" == *"-clang"* && $GITBRANCH == miui ]]; then
                         SUBARCH=$SUBARCH \
                         CC=$CCK \
                         CLANG_TRIPLE=$CLANGTRIPLEK \
-                        CROSS_COMPILE=$CROSS_COMPILEK
+                        CROSS_COMPILE=$CROSS_COMPILEK \
+                        KCFLAGS="$KCFLAGS" | tee build-log.txt ;
 
 elif [[ $GITBRANCH == dtc ]]; then
   start=$SECONDS
@@ -247,13 +250,14 @@ elif [[ $GITBRANCH == dtc ]]; then
                         CC=$CCK \
                         CLANG_TRIPLE=$CLANGTRIPLEK \
                         CLANG_LD_PATH=$CLANG_LD_PATHK \
-                        LLVM_DIS=$LLVM_DISK
+                        LLVM_DIS=$LLVM_DISK \
+                        KCFLAGS="$KCFLAGS" | tee build-log.txt ;
 
 elif [[ "$*" == *"-dtc"* && $GITBRANCH == miui ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
   $MAKE ARCH=$ARCH $DEFCONFIGK
-  $MAKE modules CC=$CCK CLANG_TRIPLE=$CROSS_COMPILEK | tee build-log.txt ;
+  $MAKE modules CC=$CCK CLANG_TRIPLE=$CROSS_COMPILEK KCFLAGS="$KCFLAGS" | tee build-log.txt ;
 
   PATH="$CLANGDIR/bin:$GCCDIR/bin:${PATH}" \
   make -j$(nproc --all) O=$OUT_DIR \
@@ -263,7 +267,7 @@ elif [[ "$*" == *"-dtc"* && $GITBRANCH == miui ]]; then
                         CLANG_TRIPLE=$CLANGTRIPLEK \
                         CLANG_LD_PATH=$CLANG_LD_PATHK \
                         LLVM_DIS=$LLVM_DISK \
-                        KCFLAGS=$KCFLAGS
+                        KCFLAGS="$KCFLAGS" | tee build-log.txt ;
 
 elif [[ $GITBRANCH == miui ]]; then
   start=$SECONDS
