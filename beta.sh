@@ -166,7 +166,7 @@ cd $SEMAPHORE_PROJECT_DIR
 
 if [[ $GITBRANCH == miui ]]; then
   echo -e "\033[0;35m> making modules for miui \033[0;0m\n"
-  export ARCH=arm64 export SUBARCH=arm64 CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  export ARCH=arm64 && export SUBARCH=arm64 && export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
   make O=out santoni_defconfig
   make O=out modules
 fi
