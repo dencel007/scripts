@@ -88,8 +88,7 @@ export MAKE="make O=${OUT_DIR}";
 # point CROSS_COMPILE to the folder of the desired toolchain
 # don't forget to specify the prefix. Mine is: aarch64-linux-android-
 
-export TCPREFIX=aarch64-linux-gnu-
-export CROSS_COMPILEK=$GCCDIR/bin/$TCPREFIX
+export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
 
 # functions - @infinity-plus
 function sendlog {
@@ -175,6 +174,7 @@ fi
 if [[ $GITBRANCH == clang ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
+  export ARCH=arm64 && export SUBARCH=arm64
   make O=out ARCH=arm64 santoni_defconfig
   PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
 
@@ -188,6 +188,7 @@ if [[ $GITBRANCH == clang ]]; then
 elif [[ $GITBRANCH == dtc ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
+  export ARCH=arm64 && export SUBARCH=arm64
   make O=out ARCH=arm64 santoni_defconfig
   PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
 
