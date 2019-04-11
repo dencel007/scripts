@@ -11,14 +11,6 @@ echo -e "\n\033[0;30m##################################################"
 echo -e "\033[0;92m### semaphore ci v1.0 - kernel building script ###"
 echo -e "\033[0;30m##################################################\033[0m\n"
 
-
-# specific environment variables
-export KBUILD_BUILD_USER="Dencel"
-export KBUILD_BUILD_HOST="Zeus"
-
-export DEVICE=HM4X;
-export DEFCONFIGK=santoni_defconfig;
-
 # identify git branchname
 if [[ $BRANCH_NAME == *clang* || "$*" == *"-clang"* ]]; then
   export GITBRANCH=clang
