@@ -227,11 +227,11 @@ fi
 
 # get current kernel makefile version
 KERNEL_VERSION=$(head -n3 Makefile | sed -E 's/.*(^\w+\s[=]\s)//g' | xargs | sed -E 's/(\s)/./g')
-echo -e "\033[0;36m> packing ${KERNEL_NAME}.${DEVICE}.${OSTYPE}.${OSVERSION} kernel v$KERNEL_VERSION  \033[0;0m\n"
+echo -e "\033[0;36m> packing ${KERNEL_NAME}.${OSTYPE}.${OSVERSION}kernel v$KERNEL_VERSION  \033[0;0m\n"
 
 end=$SECONDS
 duration=$(( end - start ))
-printf "\033[0;32m> $KERNEL_NAME ci build completed in %dh:%dm:%ds \033[0;0m" $(($duration/3600)) $(($duration%3600/60)) $(($duration%60))
+printf "\033[0;32m> $KERNEL_NAME kernel ci build completed in %dh:%dm:%ds \033[0;0m" $(($duration/3600)) $(($duration%3600/60)) $(($duration%60))
 echo -e "\n\n\033[0;35m> ================== now, let's zip it ! ===================\033[0;0m\n"
 
 cd $SEMAPHORE_PROJECT_DIR
