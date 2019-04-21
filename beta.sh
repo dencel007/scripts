@@ -36,10 +36,10 @@ else
 fi
 
 # identify os version
-if [[ $BRANCH_NAME == *pie* ]]; then
+if [[ $BRANCH_NAME == *pie* || $BRANCH_NAME == *p9x* ]]; then
   export OSVERSION=P
   echo -e "\033[0;91m> building for android = P \033[0m\n"
-elif [[ $BRANCH_NAME == *oreo* ]]; then
+elif [[ $BRANCH_NAME == *oreo* || $BRANCH_NAME == *o8x* ]]; then
   export OSVERSION=O
   echo -e "\033[0;91m> building for android = O \033[0m\n"
 elif [[ $BRANCH_NAME == *miui* ]]; then
@@ -196,7 +196,7 @@ else
   start=$SECONDS
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
-  export ARCH=arm64 export SUBARCH=arm64 CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  export ARCH=arm64 && export SUBARCH=arm64 && CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
   make O=out $DEFCONFIGK
   make O=out -j$(nproc --all) | tee build-log.txt ;
 fi
