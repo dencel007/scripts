@@ -29,10 +29,10 @@ fi
 # identify os type
 if [[ $BRANCH_NAME == *miui* ]]; then
   export OSTYPE=MIUI
-  echo -e "\033[0;91m> building for android = MIUI \033[0m\n"
+  echo -e "\033[0;91m> building for = MIUI \033[0m\n"
 else
   export OSTYPE=AOSP
-  echo -e "\033[0;91m> building for android  = AOSP \033[0m\n"
+  echo -e "\033[0;91m> building for = AOSP \033[0m\n"
 fi
 
 # identify os version
@@ -157,7 +157,8 @@ cd $SEMAPHORE_PROJECT_DIR
 
 if [[ $GITBRANCH == miui ]]; then
   echo -e "\033[0;35m> making modules for miui \033[0;0m\n"
-  export ARCH=arm64 && export SUBARCH=arm64 && export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  export ARCH=arm64 
+  export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
   make O=out $DEFCONFIGK
   make O=out modules
 fi
@@ -166,7 +167,8 @@ fi
 if [[ $GITBRANCH == clang ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  export ARCH=arm64 && export SUBARCH=arm64
+  export ARCH=arm64 
+  export SUBARCH=arm64
   make O=out ARCH=arm64 $DEFCONFIGK
   PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
 
@@ -180,7 +182,8 @@ if [[ $GITBRANCH == clang ]]; then
 elif [[ $GITBRANCH == dtc ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  export ARCH=arm64 && export SUBARCH=arm64
+  export ARCH=arm64 
+  export SUBARCH=arm64
   make O=out ARCH=arm64 $DEFCONFIGK
   PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
 
@@ -196,7 +199,8 @@ else
   start=$SECONDS
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
-  export ARCH=arm64 && export SUBARCH=arm64 && CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  export ARCH=arm64 
+  export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
   make O=out $DEFCONFIGK
   make O=out -j$(nproc --all) | tee build-log.txt ;
 fi
