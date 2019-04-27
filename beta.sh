@@ -220,7 +220,7 @@ if [[ ! -f "${IMAGE_OUT}" ]]; then
     echo -e "\n\033[0;31m> $IMAGE_OUT not FOUND. build failed \033[0;0m\n";
     curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Build failed !" -d chat_id=$CHAT_ID
     sendlog "build-log.txt";
-    grep -iE 'crash|error|fail|fatal' "build-log.txt" &> "mini_log.txt";
+    grep -iE 'crash|Crash|CRASH|error|Error|ERROR|fail|Fail|FAIL|fatal|Fatal|FATAL' "build-log.txt" &> "mini_log.txt";
     sendlog "mini_log.txt";
     success=false;
     exit 1;
@@ -323,7 +323,3 @@ else
 fi
 
 echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
-
-
-
-
