@@ -159,7 +159,7 @@ if [[ $GITBRANCH == miui ]]; then
   echo -e "\033[0;35m> making modules for miui \033[0;0m\n"
   export ARCH=arm64 
   export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
-  make O=out $DEFCONFIGK ;
+  make O=out $DEFCONFIGK
   make O=out modules
 fi
 
@@ -169,7 +169,7 @@ if [[ $GITBRANCH == clang ]]; then
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
   export ARCH=arm64 
   export SUBARCH=arm64
-  make O=out ARCH=arm64 $DEFCONFIGK ;
+  make O=out ARCH=arm64 $DEFCONFIGK
   PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
 
   make -j$(nproc --all) O=out \
@@ -184,7 +184,7 @@ elif [[ $GITBRANCH == dtc ]]; then
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
   export ARCH=arm64 
   export SUBARCH=arm64
-  make O=out ARCH=arm64 $DEFCONFIGK ;
+  make O=out ARCH=arm64 $DEFCONFIGK
   PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
 
   make -j$(nproc --all) O=out \
@@ -201,7 +201,7 @@ else
 
   export ARCH=arm64 
   export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
-  make O=out $DEFCONFIGK ;
+  make O=out $DEFCONFIGK
   make O=out -j$(nproc --all) | tee build-log.txt ;
 fi
 
