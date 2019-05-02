@@ -4,6 +4,9 @@ export TZ="Asia/Kolkata";
 # make more room in the environment
 # sudo rm -rf ~/.rbenv ~/.phpbrew
 
+# $SEMAPHORE_PROJECT_DIR = /home/runner/git-repo-name-here
+# $KERNEL_WORKING_DIR = /home/runner
+
 # predefined variables - https://semaphoreci.com/docs/available-environment-variables.html
 cd $SEMAPHORE_PROJECT_DIR
 
