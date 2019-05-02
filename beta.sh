@@ -83,6 +83,7 @@ export MAKE="make O=${OUT_DIR}";
 # point CROSS_COMPILE to the folder of the desired toolchain
 # don't forget to specify the prefix. Mine is: aarch64-linux-android-
 
+export STRIP_PREFIX=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
 export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
 
 # functions - @infinity-plus
@@ -263,8 +264,8 @@ if [[ $GITBRANCH == miui ]]; then
 
   sudo chmod -R 755 $MODULES_DIR/*
 
-  "$CROSS_COMPILEK"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
-  "$CROSS_COMPILEK"strip --strip-debug $MODULES_DIR/* 2>/dev/null
+  "$STRIP_PREFIX"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
+  "$STRIP_PREFIX"strip --strip-debug $MODULES_DIR/* 2>/dev/null
 
   mkdir -p $ZIPMODULES_DIR/system/lib/modules
   sudo chmod -R 755 $ZIPMODULES_DIR/*
