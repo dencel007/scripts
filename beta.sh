@@ -115,7 +115,7 @@ install-package jq ccache bc libncurses5-dev git-core gnupg flex bison gperf bui
 if [[ "$*" == *"-gcc8"* ]]; then
   git clone https://github.com/RaphielGang/aarch64-linux-gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
 elif [[ "$*" == *"-gcc9"* ]]; then
-  git clone https://github.com/VRanger/aarch64-linux-gnu/ -b gnu-9.x $HOME/gcc-host-linux-x86 --depth=1
+  git clone https://github.com/Haseo97/aarch64-elf-gcc -b master $HOME/gcc-host-linux-x86 --depth=1
 elif [[ "$*" == *"-linaro7"* ]]; then
   git clone https://github.com/teamfirangi/linaro-7.3 $HOME/gcc-host-linux-x86 --depth=1
 else
