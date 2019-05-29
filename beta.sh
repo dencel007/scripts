@@ -55,7 +55,7 @@ elif [[ $BRANCH_NAME == *miui* ]]; then
 fi
 
 # identify branch is whether treble or not
-if grep -q by-name/cust "arch/arm/boot/dts/qcom/msm8937.dtsi"; then
+if grep -q by-name/cust "msm8940-pmi8950-qrd-sku7*.dtsi"; then
   export MAKETYPE=treble
   echo -e "\033[0;91m> make type = treble \033[0m\n"
 else
