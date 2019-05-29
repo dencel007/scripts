@@ -55,12 +55,18 @@ elif [[ $BRANCH_NAME == *miui* ]]; then
 fi
 
 # identify branch is whether treble or not
-if grep -q by-name/cust "msm8940-pmi8950-qrd-sku7*.dtsi"; then
+if [[ $DEFCONFIGK == *treble* ]]; then
   export MAKETYPE=treble
   echo -e "\033[0;91m> make type = treble \033[0m\n"
 else
   export MAKETYPE=non-treble
   echo -e "\033[0;91m> make type = non-treble \033[0m\n"
+fi
+
+if [[ $DEFCONFIGK == *treble* ]]; then
+  export ZIP_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}.TR.$(date +%d%m%Y.%H%M).zip";
+else
+  export ZIP_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M).zip";
 fi
 
 # most of the code below this line are applicable for all kernel builds, except, anykernel clone is again santoni specific
@@ -74,7 +80,7 @@ export ZIP_DIR=${SEMAPHORE_PROJECT_DIR}/AnyKernel2
 export OUT_DIR=${SEMAPHORE_PROJECT_DIR}/out
 
 # zip related stuff
-export ZIP_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M).zip";
+
 export FINAL_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}";
 export FINAL_ZIP=$ZIP_DIR/${ZIP_NAME}
 export IMAGE_OUT=$OUT_DIR/arch/arm64/boot/Image.gz-dtb
@@ -264,7 +270,7 @@ fi
 
 # get current kernel makefile version
 KERNEL_VERSION=$(head -n3 Makefile | sed -E 's/.*(^\w+\s[=]\s)//g' | xargs | sed -E 's/(\s)/./g')
-echo -e "\033[0;36m> packing ${KERNEL_NAME}.${OSTYPE}.${OSVERSION}kernel v$KERNEL_VERSION  \033[0;0m\n"
+echo -e "\033[0;36m> packing ${KERNEL_NAME}.${OSTYPE}.${OSVERSION} kernel v$KERNEL_VERSION  \033[0;0m\n"
 
 end=$SECONDS
 duration=$(( end - start ))
@@ -327,6 +333,7 @@ then
 # final push to telegram
 curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
 name : $FINAL_NAME
+type : $MAKETYPE
 $url" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
