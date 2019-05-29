@@ -86,9 +86,13 @@ export MAKE="make O=${OUT_DIR}";
 # ==================================
 # point CROSS_COMPILE to the folder of the desired toolchain
 # don't forget to specify the prefix. mine is: aarch64-linux-android-
-
-export STRIP_PREFIX=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
-export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+if [[ "$*" == *"-gcc9"* ]]; then
+  export STRIP_PREFIX=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
+  export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
+else
+  export STRIP_PREFIX=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+fi
 
 # functions - credits: @infinity-plus and @Vvr-RockStar
 function sendlog {
@@ -180,7 +184,11 @@ make o=out clean
 if [[ $GITBRANCH == miui ]]; then
   echo -e "\n\033[0;35m> making modules for miui \033[0;0m\n"
   export ARCH=arm64
-  export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  if [[ "$*" == *"-gcc9"* ]]; then
+    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
+  else
+    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  fi
   $MAKE $DEFCONFIGK
   $MAKE modules
 fi
@@ -220,7 +228,11 @@ else
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
   export ARCH=arm64
-  export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  if [[ "$*" == *"-gcc9"* ]]; then
+    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
+  else
+    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+  fi
   $MAKE $DEFCONFIGK
   $MAKE -j$(nproc --all) | tee build-log.txt ;
 fi
