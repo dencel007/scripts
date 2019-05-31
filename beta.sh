@@ -75,6 +75,7 @@ export KERNEL_WORKING_DIR=$(dirname "$(pwd)")
 # directories - read n' understand the paths, u dumbass !
 export GCCDIR=${HOME}/gcc-host-linux-x86
 export CLANGDIR=${HOME}/clang-host-linux-x86
+export GCC32DIR=${HOME}/gcc-host-linux
 
 export ZIP_DIR=${SEMAPHORE_PROJECT_DIR}/AnyKernel2
 export OUT_DIR=${SEMAPHORE_PROJECT_DIR}/out
@@ -131,6 +132,9 @@ elif [[ "$*" == *"-linaro7"* ]]; then
 else
   git clone https://github.com/ryan-andri/aarch64-linaro-linux-gnu-4.9 $HOME/gcc-host-linux-x86 --depth=1
 fi
+
+# get arm toochain
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 $HOME/gcc-host-linux --depth=1
 
 # get gcc version - credits: @infinity-plus
 export GCCVERSION=$($GCCDIR/bin/*-gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
@@ -234,6 +238,7 @@ else
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
   export ARCH=arm64
+  export CROSS_COMPILE_ARM32=$HOME/gcc-host-linux/bin/arm-linux-androideabi-
   if [[ "$*" == *"-gcc9"* ]]; then
     export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
   else
