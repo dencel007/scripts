@@ -124,7 +124,8 @@ function checkVar() {
    then
      echo -e "Please set $1"
      exit 1
-fi
+   fi
+}
 
 # Check necessary variables
 checkVar CHAT_ID
