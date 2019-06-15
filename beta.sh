@@ -217,7 +217,7 @@ if [[ $GITBRANCH == clang ]]; then
                         SUBARCH=arm64 \
                         CC=$HOME/clang-host-linux-x86/bin/clang \
                         CLANG_TRIPLE=aarch64-linux-gnu- \
-                        CROSS_COMPILE=aarch64-linux-gnu- | tee build-log.txt ;
+                        CROSS_COMPILE=aarch64-linux-gnu- 2>&1 | tee build-log.txt
 elif [[ $GITBRANCH == dtc ]]; then
   start=$SECONDS
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
@@ -232,7 +232,7 @@ elif [[ $GITBRANCH == dtc ]]; then
                         CC=$HOME/clang-host-linux-x86/bin/clang \
                         CLANG_TRIPLE=aarch64-linux-gnu- \
                         CLANG_LD_PATH=${HOME}/clang-host-linux-x86/clang/lib \
-                        LLVM_DIS=${HOME}/clang-host-linux-x86/bin/llvm-dis | tee build-log.txt ;
+                        LLVM_DIS=${HOME}/clang-host-linux-x86/bin/llvm-dis 2>&1 | tee build-log.txt
 else
   start=$SECONDS
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
@@ -245,7 +245,7 @@ else
     export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
   fi
   $MAKE $DEFCONFIGK
-  $MAKE -j$(nproc --all) | tee build-log.txt ;
+  $MAKE -j$(nproc --all) 2>&1 | tee build-log.txt
 fi
 
 # Want custom kernel flags ?
