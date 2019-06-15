@@ -359,8 +359,8 @@ then
  last commit :
  $(git log --pretty=format:'%h | %s' -1)
  " 
- SendDoc "$FINAL_ZIP" $caption
- SendMsg $text
+ SendDoc "$FINAL_ZIP" "$caption"
+ SendMsg "$text"
 
  curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id=$CHAT_ID
  rm -rf $ZIP_DIR/$ZIP_NAME
