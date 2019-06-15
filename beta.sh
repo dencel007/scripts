@@ -339,7 +339,7 @@ fi
 evv LINUX_COMPILER
 
 # final push to telegram
-
+if [ -f "$FINAL_ZIP" ]
 caption="
 name : $FINAL_NAME
 type : $MAKETYPE
@@ -362,8 +362,7 @@ SendMsg $text
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id=$CHAT_ID
 rm -rf $ZIP_DIR/$ZIP_NAME
-fi
+echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
 else
 echo -e "\n\033[0;31m> zip creation failed \033[0;0m\n"
 fi
-echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
