@@ -83,22 +83,6 @@ export FINAL_NAME="${KERNEL_NAME}-${OSTYPE}-${OSVERSION}"
 export FINAL_ZIP=$ZIP_DIR/${ZIP_NAME}
 export IMAGE_OUT=$OUT_DIR/arch/arm64/boot/Image.gz-dtb
 
-# misc
-export MAKE="make O=${OUT_DIR}"
-
-# Want to use a different toolchain? (DTC, UberTC etc) - credits: @bitrvmpd
-# ==================================
-# point CROSS_COMPILE to the folder of the desired toolchain
-# don't forget to specify the prefix. mine is: aarch64-linux-android-
-if [[ "$*" == *"-gcc9"* ]]
-then
-  export STRIP_PREFIX=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
-  export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
-else
-  export STRIP_PREFIX=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
-  export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
-fi
-
 # functions - credits: @infinity-plus and @Vvr-RockStar
 function SendDoc() {
 	curl -F chat_id=$CHAT_ID -F document=@"$1" -F caption="$2" https://api.telegram.org/bot$BOT_API_KEY/sendDocument 1> /dev/null
@@ -152,15 +136,21 @@ checkVar KERNEL_NAME
 # sudo apt-get install -y build-essential libncurses5-dev bzip2 bc ccache git-core
 install-package jq ccache bc libncurses5-dev git-core gnupg flex bison gperf build-essential zip curl libc6-dev ncurses-dev
 
+# Want to use a different toolchain? (DTC, UberTC etc) - credits: @bitrvmpd
+# ==================================
+# point CROSS_COMPILE to the folder of the desired toolchain
+# don't forget to specify the prefix. mine is: aarch64-linux-android-
+
 # get gcc
-export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+export CROSS_COMPILE=$GCCDIR/bin/aarch64-linux-gnu-
+
 if [[ "$*" == *"-gcc8"* ]]
  then
   git clone https://github.com/RaphielGang/aarch64-linux-gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
 elif [[ "$*" == *"-gcc9"* ]]
 then
   git clone https://github.com/Haseo97/aarch64-elf-gcc -b master $HOME/gcc-host-linux-x86 --depth=1
-   export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
+  export CROSS_COMPILE=$GCCDIR/bin/aarch64-elf-
 elif [[ "$*" == *"-linaro7"* ]]
 then
   git clone https://github.com/teamfirangi/linaro-7.3 $HOME/gcc-host-linux-x86 --depth=1
@@ -320,8 +310,8 @@ then
  find -name "*.ko" -exec mv {} $MODULES_DIR \
  sudo chmod -R 755 $MODULES_DIR/*
 
- "$STRIP_PREFIX"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
- "$STRIP_PREFIX"strip --strip-debug $MODULES_DIR/* 2>/dev/null
+ "$CROSS_COMPILE"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
+ "$CROSS_COMPILE"strip --strip-debug $MODULES_DIR/* 2>/dev/null
 
  mkdir -pv $ZIPMODULES_DIR/system/lib/modules
  sudo chmod -R 755 $ZIPMODULES_DIR/*
