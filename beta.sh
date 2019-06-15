@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # set your timezone here
-export TZ="Asia/Kolkata";
+export TZ="Asia/Kolkata"
 
 # helpdesk
 # =========
@@ -19,13 +19,17 @@ echo -e "\033[0;92m### semaphore ci v1.0 - kernel building script ###"
 echo -e "\033[0;30m##################################################\033[0m\n"
 
 # identify git branchname
-if [[ $BRANCH_NAME == *clang* || "$*" == *"-clang"* ]]; then
+
+if [[ $BRANCH_NAME == *clang* || "$*" == *"-clang"* ]]
+then
   export GITBRANCH=clang
   echo -e "\033[0;91m> git branch = CLANG \033[0m\n"
-elif [[ $BRANCH_NAME == *dtc* || "$*" == *"-dtc"* ]]; then
+elif [[ $BRANCH_NAME == *dtc* || "$*" == *"-dtc"* ]]
+then
   export GITBRANCH=dtc
   echo -e "\033[0;91m> git branch = DTC CLANG \033[0m\n"
-elif [[ $BRANCH_NAME == *miui* ]]; then
+elif [[ $BRANCH_NAME == *miui* ]]
+then
   export GITBRANCH=miui
   echo -e "\033[0;91m> git branch = MIUI \033[0m\n"
 else
@@ -33,44 +37,37 @@ else
   echo -e "\033[0;91m> git branch = AOSP \033[0m\n"
 fi
 
-# identify os type
-if [[ $BRANCH_NAME == *miui* ]]; then
-  export OSTYPE=MIUI
-  echo -e "\033[0;91m> OS = MIUI \033[0m\n"
-else
-  export OSTYPE=AOSP
-  echo -e "\033[0;91m> OS = AOSP \033[0m\n"
-fi
+# identify os type and version
 
-# identify os version
-if [[ $BRANCH_NAME == *pie* || $BRANCH_NAME == *p9x* ]]; then
+export OSTYPE=AOSP
+if [[ $BRANCH_NAME == *pie* || $BRANCH_NAME == *p9x* ]]
+then
   export OSVERSION=P
   echo -e "\033[0;91m> android version = P \033[0m\n"
-elif [[ $BRANCH_NAME == *oreo* || $BRANCH_NAME == *o8x* ]]; then
+elif [[ $BRANCH_NAME == *oreo* || $BRANCH_NAME == *o8x* ]]
+then
   export OSVERSION=O
   echo -e "\033[0;91m> android version = O \033[0m\n"
-elif [[ $BRANCH_NAME == *miui* ]]; then
+elif [[ $BRANCH_NAME == *miui* ]]
+then
+  export OSTYPE=MIUI
   export OSVERSION=N
-  echo -e "\033[0;91m> android version = N \033[0m\n"
 fi
+echo -e "\033[0;91m> android type = ${OSTYPE} ${OSVERSION} \033[0m\n"
+
 
 # identify branch is whether treble or not
-if [[ $DEFCONFIGK == *treble* ]]; then
+if [[ $DEFCONFIGK == *treble* ]]
+then
   export MAKETYPE=treble
+  export ZIP_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}.TR.$(date +%d%m%Y.%H%M).zip"
   echo -e "\033[0;91m> make type = treble \033[0m\n"
 else
   export MAKETYPE=non-treble
+  export ZIP_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M).zip"
   echo -e "\033[0;91m> make type = non-treble \033[0m\n"
 fi
 
-if [[ $DEFCONFIGK == *treble* ]]; then
-  export ZIP_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}.TR.$(date +%d%m%Y.%H%M).zip";
-else
-  export ZIP_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}.$(date +%d%m%Y.%H%M).zip";
-fi
-
-# most of the code below this line are applicable for all kernel builds, except, anykernel clone is again santoni specific
-export KERNEL_WORKING_DIR=$(dirname "$(pwd)")
 
 # directories - read n' understand the paths, u dumbass !
 export GCCDIR=${HOME}/gcc-host-linux-x86
@@ -82,18 +79,19 @@ export OUT_DIR=${SEMAPHORE_PROJECT_DIR}/out
 
 # zip related stuff
 
-export FINAL_NAME="${KERNEL_NAME}.${OSTYPE}.${OSVERSION}";
+export FINAL_NAME="${KERNEL_NAME}-${OSTYPE}-${OSVERSION}"
 export FINAL_ZIP=$ZIP_DIR/${ZIP_NAME}
 export IMAGE_OUT=$OUT_DIR/arch/arm64/boot/Image.gz-dtb
 
 # misc
-export MAKE="make O=${OUT_DIR}";
+export MAKE="make O=${OUT_DIR}"
 
 # Want to use a different toolchain? (DTC, UberTC etc) - credits: @bitrvmpd
 # ==================================
 # point CROSS_COMPILE to the folder of the desired toolchain
 # don't forget to specify the prefix. mine is: aarch64-linux-android-
-if [[ "$*" == *"-gcc9"* ]]; then
+if [[ "$*" == *"-gcc9"* ]]
+then
   export STRIP_PREFIX=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
   export CROSS_COMPILEK=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
 else
@@ -110,21 +108,25 @@ function SendMsg() {
 	curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage  -d "parse_mode=markdown" -d text="$1 " -d chat_id=$CHAT_ID 1> /dev/null
 }
 
-
-function sendlog {
-  RESULT=$(curl -sf --data-binary @"${1:--}" https://del.dog/documents) ||
-  {
-    echo "ERROR: failed to post document" >&2
-    exit 1
-  }
-  KEY=$(jq -r .key <<< "${RESULT}")
-  url="https://del.dog/${KEY}"
-  curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="build failed, "$1" "$url" " -d chat_id=$CHAT_ID
+function sendlog() {
+    for BINARY in curl jq
+    do
+        command -v ${BINARY} &>/dev/null || {
+            SendMsg "ERROR: ${BINARY} is not installed" >&2
+            exit 1
+        }
+    done
+    RESULT=$(curl -sf --data-binary @"${1:--}" https://del.dog/documents) || {
+        SendMsg "ERROR: failed to post document, ca-certificates might need to be installed" >&2
+        exit 1
+    }
+    SendMsg "Here's the [${1}](https://del.dog/$(jq -r .key <<< "${RESULT}"))"
 }
+
 function transfer() {
-  zipname="$(echo $1 | awk -F '/' '{print $NF}')";
-  url="$(curl -# -T $1 https://transfer.sh)";
-  echo -e "\n\033[0;35m>download ${zipname} at ${url} \033[0;0m\n";
+  zipname="$(echo $1 | awk -F '/' '{print $NF}')"
+  url="$(curl -# -T $1 https://transfer.sh)"
+  echo -e "\n\033[0;35m>download ${zipname} at ${url} \033[0;0m\n"
 }
 
 # Get kernel details from compile.h -credits: @nathanchance
@@ -138,11 +140,16 @@ function evv() {
 install-package jq ccache bc libncurses5-dev git-core gnupg flex bison gperf build-essential zip curl libc6-dev ncurses-dev
 
 # get gcc
-if [[ "$*" == *"-gcc8"* ]]; then
+export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
+if [[ "$*" == *"-gcc8"* ]]
+ then
   git clone https://github.com/RaphielGang/aarch64-linux-gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
-elif [[ "$*" == *"-gcc9"* ]]; then
+elif [[ "$*" == *"-gcc9"* ]]
+then
   git clone https://github.com/Haseo97/aarch64-elf-gcc -b master $HOME/gcc-host-linux-x86 --depth=1
-elif [[ "$*" == *"-linaro7"* ]]; then
+   export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
+elif [[ "$*" == *"-linaro7"* ]]
+then
   git clone https://github.com/teamfirangi/linaro-7.3 $HOME/gcc-host-linux-x86 --depth=1
 else
   git clone https://github.com/ryan-andri/aarch64-linaro-linux-gnu-4.9 $HOME/gcc-host-linux-x86 --depth=1
@@ -156,26 +163,29 @@ export GCCVERSION=$($GCCDIR/bin/*-gcc --version | head -n 1 | perl -pe 's/\(http
 echo -e "\033[0;31m\n$GCCVERSION ready to compile ! \033[0;0m\n"
 
 # get clang
-if [[ $GITBRANCH == dtc ]]; then
+if [[ $GITBRANCH == dtc ]]
+then
   git clone https://github.com/VRanger/dragontc $HOME/clang-host-linux-x86 --depth=1
-elif [[ $GITBRANCH == clang ]]; then
+elif [[ $GITBRANCH == clang ]]
+then
   git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5407736 $HOME/clang-host-linux-x86 --depth=1
 fi
 
-if [[ -e $HOME/clang-host-linux-x86 ]]; then
+if [[ -e $HOME/clang-host-linux-x86 ]]
+then
   export CLANGVERSION=$($CLANGDIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
   echo -e "\033[0;31m\n$CLANGVERSION ready to compile ! \033[0;0m\n"
 fi
 
 # get anykernel2
-if [ -e ${ZIP_DIR} ]; then
-  rm -rf ${ZIP_DIR}
-fi
+#Clean ZIP_DIR, if any
+rm -rf ${ZIP_DIR}
 
-if [[ $GITBRANCH == miui ]]; then
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-modules ${ZIP_DIR} --depth=1
+if [[ $GITBRANCH == miui ]]
+then
+  git clone https://github.com/dencel007/AnyKernel2 -b santoni-modules ${ZIP_DIR} ${SEMAPHORE_PROJECT_DIR}/AnyKernel2 --depth=1
 else
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-main ${ZIP_DIR} --depth=1
+  git clone https://github.com/dencel007/AnyKernel2 -b santoni-main ${ZIP_DIR} ${SEMAPHORE_PROJECT_DIR}/AnyKernel2 --depth=1
 fi
 
 # prepend ccache into the PATH
@@ -191,77 +201,25 @@ cd $SEMAPHORE_PROJECT_DIR
 
 # out directory config - why ?
 # http://bit.ly/2UQv06H - read thoroughly
-if [ -e ${OUT_DIR} ]; then
-  echo -e "\n\033[0;32m> out directory already exists ! deleting it.... \033[0;0m\n" ;
-  rm -rf ${OUT_DIR};
+if [ -e ${OUT_DIR} ]
+then
+  echo -e "\n\033[0;32m> out directory already exists ! deleting it.... \033[0;0m\n" 
+  rm -rf ${OUT_DIR}
 else
-  echo -e "\n\033[0;32m> out directory doesn't exist ! creating it.... \033[0;0m\n" ;
-  mkdir -pv ${OUT_DIR};
+  echo -e "\n\033[0;32m> out directory doesn't exist ! creating it.... \033[0;0m\n" 
+  mkdir -pv ${OUT_DIR}
 fi
-
-echo -e "\n\033[0;32m> executing make clean \033[0;0m\n" ;
+export MAKE="make O=out"
+echo -e "\n\033[0;32m> executing make clean \033[0;0m\n"
 make clean
-echo -e "\n\033[0;32m> executing make O=out clean \033[0;0m\n" ;
-make o=out clean
+echo -e "\n\033[0;32m> executing make O=out clean \033[0;0m\n"
+${MAKE} clean
 
 # main build commands starts here
-# making modules for miui
-if [[ $GITBRANCH == miui ]]; then
-  echo -e "\n\033[0;35m> making modules for miui \033[0;0m\n"
-  export ARCH=arm64
-  if [[ "$*" == *"-gcc9"* ]]; then
-    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
-  else
-    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
-  fi
-  $MAKE $DEFCONFIGK
-  $MAKE modules
-fi
 
-# clang/dtc/gcc build commands
-if [[ $GITBRANCH == clang ]]; then
-  start=$SECONDS
-  echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  export ARCH=arm64
-  export SUBARCH=arm64
-  $MAKE ARCH=arm64 $DEFCONFIGK
-  PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
-
-  make -j$(nproc --all) O=out \
-                        ARCH=arm64 \
-                        SUBARCH=arm64 \
-                        CC=$HOME/clang-host-linux-x86/bin/clang \
-                        CLANG_TRIPLE=aarch64-linux-gnu- \
-                        CROSS_COMPILE=aarch64-linux-gnu- 2>&1 | tee build-log.txt
-elif [[ $GITBRANCH == dtc ]]; then
-  start=$SECONDS
-  echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
-  export ARCH=arm64
-  export SUBARCH=arm64
-  make O=out ARCH=arm64 $DEFCONFIGK
-  PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
-
-  make -j$(nproc --all) O=out \
-                        ARCH=arm64 \
-                        SUBARCH=arm64 \
-                        CC=$HOME/clang-host-linux-x86/bin/clang \
-                        CLANG_TRIPLE=aarch64-linux-gnu- \
-                        CLANG_LD_PATH=${HOME}/clang-host-linux-x86/clang/lib \
-                        LLVM_DIS=${HOME}/clang-host-linux-x86/bin/llvm-dis 2>&1 | tee build-log.txt
-else
-  start=$SECONDS
-  echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
-
-  export ARCH=arm64
-  export CROSS_COMPILE_ARM32=$HOME/gcc-host-linux/bin/arm-linux-androideabi-
-  if [[ "$*" == *"-gcc9"* ]]; then
-    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-elf-
-  else
-    export CROSS_COMPILE=$HOME/gcc-host-linux-x86/bin/aarch64-linux-gnu-
-  fi
-  $MAKE $DEFCONFIGK
-  $MAKE -j$(nproc --all) 2>&1 | tee build-log.txt
-fi
+export ARCH=arm64
+export SUBARCH=arm64
+$MAKE $DEFCONFIGK
 
 # Want custom kernel flags ?
 # =========================
@@ -272,76 +230,107 @@ fi
 # line 625 to 628, located in the root dir of this kernel.
 
 # KBUILD_KERNEL_CFLAGS=-Wno-misleading-indentation -Wno-bool-compare -mtune=cortex-a53 -march=armv8-a+crc+simd+crypto -mcpu=cortex-a53 -O2
-# KBUILD_KERNEL_CFLAGS=$KBUILD_KERNEL_CFLAGS ARCH=arm64 SUBARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE $MAKE_STATEMENT -j8
+# $MAKE -j$(nproc --all) ARCH=$ARCH SUBARCH=$SUBARCH CROSS_COMPILE=$CROSS_COMPILE KCFLAGS=$KBUILD_KERNEL_CFLAGS
+
+# making modules for miui
+if [[ $GITBRANCH == miui ]]
+then
+  echo -e "\n\033[0;35m> making modules for miui \033[0;0m\n"
+  ${MAKE} modules
+fi
+
+# clang/dtc/gcc build commands
+if [[ $GITBRANCH == clang || $GITBRANCH == dtc ]]
+then
+  start=$SECONDS
+  echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
+
+  PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
+  ${MAKE} -j$(nproc --all) \
+                         ARCH=$ARCH \
+                         SUBARCH=$SUBARCH \
+                         CC=$HOME/clang-host-linux-x86/bin/clang \
+                         CLANG_TRIPLE=aarch64-linux-gnu- \
+                         CLANG_LD_PATH=${HOME}/clang-host-linux-x86/clang/lib \
+                         LLVM_DIS=${HOME}/clang-host-linux-x86/bin/llvm-dis 2>&1 | tee build-log.txt
+else
+  start=$SECONDS
+  echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
+
+  export CROSS_COMPILE_ARM32=$HOME/gcc-host-linux/bin/arm-linux-androideabi-
+
+  ${MAKE} -j$(nproc --all) \
+                         ARCH="$ARCH" \
+                         CROSS_COMPILE="$CROSS_COMPILE" \
+                         CROSS_COMPILE_ARM32="$CROSS_COMPILE_ARM32" \
+                         KCFLAGS="$KCFLAGS" 2>&1 | tee build-log.txt
+fi
 
 # checks if the Image.gz-dtb is built or not
-if [[ ! -f "${IMAGE_OUT}" ]]; then
-    echo -e "\n\033[0;31m> $IMAGE_OUT not FOUND. build failed \033[0;0m\n";
-    SendMsg "Build failed !" 
-    sendlog "build-log.txt";
-    grep -iE 'crash|Crash|CRASH|error|Error|ERROR|fail|Fail|FAIL|fatal|Fatal|FATAL' "build-log.txt" &> "mini_log.txt";
-    sendlog "mini_log.txt";
-    success=false;
-    exit 1;
+if [[ ! -f "${IMAGE_OUT}" ]]
+then
+    echo -e "\n\033[0;31m> $IMAGE_OUT not FOUND. build failed \033[0;0m\n"
+    SendMsg "Build failed !"
+    sendlog "build-log.txt"
+    grep -iE 'crash|Crash|CRASH|error|Error|ERROR|fail|Fail|FAIL|fatal|Fatal|FATAL' "build-log.txt" &> "mini_log.txt"
+    sendlog "mini_log.txt"
+    exit 1
 else
-    echo -e "\n\033[0;32m> $IMAGE_OUT FOUND. build successful \033[0;0m\n" ;
-    success=true;
+    echo -e "\n\033[0;32m> $IMAGE_OUT FOUND. build successful \033[0;0m\n"
+    end=$SECONDS
+    duration=$(( end - start ))
+    printf "\033[0;32m> $KERNEL_NAME kernel ci build completed in %dh:%dm:%ds \033[0;0m" $(($duration/3600)) $(($duration%3600/60)) $(($duration%60))
 fi
 
 # get current kernel makefile version
 KERNEL_VERSION=$(head -n3 Makefile | sed -E 's/.*(^\w+\s[=]\s)//g' | xargs | sed -E 's/(\s)/./g')
 echo -e "\033[0;36m> packing ${KERNEL_NAME}.${OSTYPE}.${OSVERSION} kernel v$KERNEL_VERSION  \033[0;0m\n"
-
-end=$SECONDS
-duration=$(( end - start ))
-printf "\033[0;32m> $KERNEL_NAME kernel ci build completed in %dh:%dm:%ds \033[0;0m" $(($duration/3600)) $(($duration%3600/60)) $(($duration%60))
 echo -e "\n\n\033[0;35m> ================== now, let's zip it ! ===================\033[0;0m\n"
 
 cd $SEMAPHORE_PROJECT_DIR
 
 # modules directory config
-if [[ $GITBRANCH == miui ]]; then
-export MODULES_DIR=${SEMAPHORE_PROJECT_DIR}/modules/system/lib/modules
-export ZIPMODULES_DIR=${ZIP_DIR}/modules
-  if [[ -d $MODULES_DIR ]]; then
+# modules strip starts for miui
+
+if [[ $GITBRANCH == miui ]]
+then
+  export MODULES_DIR=${SEMAPHORE_PROJECT_DIR}/modules/system/lib/modules
+  export ZIPMODULES_DIR=${ZIP_DIR}/modules
+  if [[ -d $MODULES_DIR ]]
+  then
     echo -e "\n cleaning old modules folder \n"
     rm -rf $MODULES_DIR
   else
     mkdir -pv $MODULES_DIR
     echo -e "\n made new modules folder \n"
   fi
-fi
+ find -name "*.ko" -exec mv {} $MODULES_DIR \
+ sudo chmod -R 755 $MODULES_DIR/*
 
-# modules strip starts for miui
-if [[ $GITBRANCH == miui ]]; then
-  find -name "*.ko" -exec mv {} $MODULES_DIR \;
-  sudo chmod -R 755 $MODULES_DIR/*
+ "$STRIP_PREFIX"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
+ "$STRIP_PREFIX"strip --strip-debug $MODULES_DIR/* 2>/dev/null
 
-  "$STRIP_PREFIX"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
-  "$STRIP_PREFIX"strip --strip-debug $MODULES_DIR/* 2>/dev/null
-
-  mkdir -pv $ZIPMODULES_DIR/system/lib/modules
-  sudo chmod -R 755 $ZIPMODULES_DIR/*
-  cp -f $MODULES_DIR/*.ko $ZIPMODULES_DIR/system/lib/modules
-  mkdir -pv $ZIPMODULES_DIR/system/lib/modules/pronto
-  cp -f $ZIPMODULES_DIR/system/lib/modules/wlan.ko $ZIPMODULES_DIR/system/lib/modules/pronto/pronto_wlan.ko
+ mkdir -pv $ZIPMODULES_DIR/system/lib/modules
+ sudo chmod -R 755 $ZIPMODULES_DIR/*
+ cp -f $MODULES_DIR/*.ko $ZIPMODULES_DIR/system/lib/modules
+ mkdir -pv $ZIPMODULES_DIR/system/lib/modules/pronto
+ cp -f $ZIPMODULES_DIR/system/lib/modules/wlan.ko $ZIPMODULES_DIR/system/lib/modules/pronto/pronto_wlan.ko
 fi
 
 # make flashable zip using anykernel
 rm -rf $ZIP_DIR/zImage $ZIP_DIR/*.zip
 mv $IMAGE_OUT $ZIP_DIR/zImage
 cd $ZIP_DIR
-zip -r9 ${FINAL_ZIP} *;
-cd -;
+zip -r9 ${FINAL_ZIP} *
+cd -
 
 # upload zip to transfer.sh
-if [ -f "$FINAL_ZIP" ];
+if [ -f "$FINAL_ZIP" ]
 then
-  echo -e "\n\033[0;32m> $ZIP_NAME can be found at $ZIP_DIR \033[0;0m\n" ;
-if [[ ${success} == true ]];
-then
-  echo -e "\033[0;36m> uploading $ZIP_NAME to https://transfer.sh/ \033[0;0m\n" ;
-  transfer "$FINAL_ZIP";
+  echo -e "\n\033[0;32m> $ZIP_NAME can be found at $ZIP_DIR \033[0;0m\n"
+  echo -e "\033[0;36m> uploading $ZIP_NAME to https://transfer.sh/ \033[0;0m\n"
+  transfer "$FINAL_ZIP"
+fi
 
 # Get TC version
 evv LINUX_COMPILER
@@ -372,6 +361,6 @@ curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker=
 rm -rf $ZIP_DIR/$ZIP_NAME
 fi
 else
-echo -e "\n\033[0;31m> zip creation failed \033[0;0m\n";
+echo -e "\n\033[0;31m> zip creation failed \033[0;0m\n"
 fi
 echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
