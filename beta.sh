@@ -321,7 +321,7 @@ fi
 rm -rf $ZIP_DIR/zImage $ZIP_DIR/*.zip
 mv $IMAGE_OUT $ZIP_DIR/zImage
 cd $ZIP_DIR
-zip -r9 ${FINAL_ZIP} *
+zip -r9 ${FINAL_ZIP} * -x .git README.md *placeholder
 cd -
 
 # upload zip to transfer.sh
