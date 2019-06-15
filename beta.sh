@@ -135,6 +135,19 @@ function evv() {
     export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
 }
 
+function checkVar() {
+   if [[ -z ${$1} ]]
+   then
+     echo -e "Please set $1"
+     exit 1
+fi
+
+# Check necessary variables
+checkVar CHAT_ID
+checkVar BOT_API_KEY
+checkVar KERNEL_NAME
+
+
 # build environment setup
 # sudo apt-get install -y build-essential libncurses5-dev bzip2 bc ccache git-core
 install-package jq ccache bc libncurses5-dev git-core gnupg flex bison gperf build-essential zip curl libc6-dev ncurses-dev
