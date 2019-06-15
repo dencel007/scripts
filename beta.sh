@@ -118,6 +118,12 @@ function transfer() {
   echo -e "\n\033[0;35m>download ${zipname} at ${url} \033[0;0m\n";
 }
 
+# Get kernel details from compile.h -credits: @nathanchance
+function evv() {
+    FILE="${OUT_DIR}"/include/generated/compile.h
+    export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
+}
+
 # build environment setup
 # sudo apt-get install -y build-essential libncurses5-dev bzip2 bc ccache git-core
 install-package jq ccache bc libncurses5-dev git-core gnupg flex bison gperf build-essential zip curl libc6-dev ncurses-dev
@@ -328,12 +334,8 @@ then
   echo -e "\033[0;36m> uploading $ZIP_NAME to https://transfer.sh/ \033[0;0m\n" ;
   transfer "$FINAL_ZIP";
 
-  # verify the toolchain - @infinity-plus
-  if [[ $GITBRANCH == clang ]]; then
-    export TC_TYPE=$CLANGVERSION
-  else
-    export TC_TYPE=$((sed '7q;d' out/include/generated/compile.h) | awk '{$1=""; $2=""; print $0}' | cut -d '"' -f 2)
-  fi
+# Get TC version
+evv LINUX_COMPILER
 
 # final push to telegram
 curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
@@ -348,7 +350,7 @@ curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
 🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
 
 toolchain :
-$TC_TYPE
+$LINUX_COMPILER
 
 last commit :
 $(git log --pretty=format:'%h | %s' -1)
