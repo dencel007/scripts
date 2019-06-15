@@ -102,6 +102,15 @@ else
 fi
 
 # functions - credits: @infinity-plus and @Vvr-RockStar
+function SendDoc() {
+	curl -F chat_id=$CHAT_ID -F document=@"$1" -F caption="$2" https://api.telegram.org/bot$BOT_API_KEY/sendDocument 1> /dev/null
+}
+
+function SendMsg() {
+	curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage  -d "parse_mode=markdown" -d text="$1 " -d chat_id=$CHAT_ID 1> /dev/null
+}
+
+
 function sendlog {
   RESULT=$(curl -sf --data-binary @"${1:--}" https://del.dog/documents) ||
   {
@@ -268,7 +277,7 @@ fi
 # checks if the Image.gz-dtb is built or not
 if [[ ! -f "${IMAGE_OUT}" ]]; then
     echo -e "\n\033[0;31m> $IMAGE_OUT not FOUND. build failed \033[0;0m\n";
-    curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="Build failed !" -d chat_id=$CHAT_ID
+    SendMsg "Build failed !" 
     sendlog "build-log.txt";
     grep -iE 'crash|Crash|CRASH|error|Error|ERROR|fail|Fail|FAIL|fatal|Fatal|FATAL' "build-log.txt" &> "mini_log.txt";
     sendlog "mini_log.txt";
@@ -338,12 +347,13 @@ then
 evv LINUX_COMPILER
 
 # final push to telegram
-curl -F chat_id=$CHAT_ID -F document=@"$FINAL_ZIP" -F caption="
+
+caption="
 name : $FINAL_NAME
 type : $MAKETYPE
-$url" https://api.telegram.org/bot$BOT_API_KEY/sendDocument
+$url" 
 
-curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage -d text="
+text="
 ⚙️ name : $KERNEL_NAME kernel
 📕 branch : $BRANCH_NAME
 🔰 linux-version : $KERNEL_VERSION
@@ -354,8 +364,9 @@ $LINUX_COMPILER
 
 last commit :
 $(git log --pretty=format:'%h | %s' -1)
-
-" -d chat_id=$CHAT_ID
+" 
+SendDoc "$FINAL_ZIP" $caption
+SendMsg $text
 
 curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id=$CHAT_ID
 rm -rf $ZIP_DIR/$ZIP_NAME
