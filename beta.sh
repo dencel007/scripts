@@ -187,9 +187,9 @@ rm -rf ${ZIP_DIR}
 
 if [[ $GITBRANCH == miui ]]
 then
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-modules ${ZIP_DIR} ${SEMAPHORE_PROJECT_DIR}/AnyKernel2 --depth=1
+  git clone https://github.com/dencel007/AnyKernel2 -b santoni-modules ${ZIP_DIR} --depth=1
 else
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-main ${ZIP_DIR} ${SEMAPHORE_PROJECT_DIR}/AnyKernel2 --depth=1
+  git clone https://github.com/dencel007/AnyKernel2 -b santoni-main ${ZIP_DIR} --depth=1
 fi
 
 # prepend ccache into the PATH
@@ -308,7 +308,7 @@ then
     mkdir -pv $MODULES_DIR
     echo -e "\n made new modules folder \n"
   fi
- find -name "*.ko" -exec mv {} $MODULES_DIR \
+ find . -name '*ko' -exec \cp '{}' modules/ \;
  sudo chmod -R 755 $MODULES_DIR/*
 
  "$CROSS_COMPILE"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
