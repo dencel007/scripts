@@ -340,29 +340,30 @@ evv LINUX_COMPILER
 
 # final push to telegram
 if [ -f "$FINAL_ZIP" ]
-caption="
-name : $FINAL_NAME
-type : $MAKETYPE
-$url" 
+then
+ caption="
+ name : $FINAL_NAME
+ type : $MAKETYPE
+ $url" 
+ 
+ text="
+ ⚙️ name : $KERNEL_NAME kernel
+ 📕 branch : $BRANCH_NAME
+ 🔰 linux-version : $KERNEL_VERSION
+ 🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
 
-text="
-⚙️ name : $KERNEL_NAME kernel
-📕 branch : $BRANCH_NAME
-🔰 linux-version : $KERNEL_VERSION
-🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
+ toolchain :
+ $LINUX_COMPILER
 
-toolchain :
-$LINUX_COMPILER
+ last commit :
+ $(git log --pretty=format:'%h | %s' -1)
+ " 
+ SendDoc "$FINAL_ZIP" $caption
+ SendMsg $text
 
-last commit :
-$(git log --pretty=format:'%h | %s' -1)
-" 
-SendDoc "$FINAL_ZIP" $caption
-SendMsg $text
-
-curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id=$CHAT_ID
-rm -rf $ZIP_DIR/$ZIP_NAME
-echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
+ curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id=$CHAT_ID
+ rm -rf $ZIP_DIR/$ZIP_NAME
+ echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
 else
 echo -e "\n\033[0;31m> zip creation failed \033[0;0m\n"
 fi
