@@ -308,8 +308,8 @@ then
     mkdir -pv "$MODULES_DIR"
     echo -e "\n made new modules folder \n"
   fi
- find . -name '*ko' -exec \cp '{}' modules/ \;
- sudo chmod -R 755 "$MODULES_DIR"/*
+  find . -name '*ko' -exec \ cp '{}' modules/ \;
+  chmod 755 modules/*
 
  "$CROSS_COMPILE"strip --strip-unneeded "$MODULES_DIR"/* 2>/dev/null
  "$CROSS_COMPILE"strip --strip-debug "$MODULES_DIR"/* 2>/dev/null
@@ -351,7 +351,7 @@ then
  ⚙️ name : $KERNEL_NAME kernel
  📕 branch : $BRANCH_NAME
  🔰 linux-version : $KERNEL_VERSION
- 🕐 build-time : $(($duration%3600/60))m:$(($duration%60))s
+ 🕐 build-time : $((duration%3600/60))m:$((duration%60))s
 
  toolchain :
  $LINUX_COMPILER
@@ -363,7 +363,7 @@ then
  SendMsg "$text"
 
  curl -s -X POST https://api.telegram.org/bot"$BOT_API_KEY"/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id="$CHAT_ID"
- rm -rf "$ZIP_DIR"/"$ZIP_NAME"
+ rm -rf "${ZIP_DIR:?}"/"$ZIP_NAME"
  echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
 else
 echo -e "\n\033[0;31m> zip creation failed \033[0;0m\n"
