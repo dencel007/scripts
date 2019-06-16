@@ -283,7 +283,7 @@ else
     echo -e "\n\033[0;32m> $IMAGE_OUT FOUND. build successful \033[0;0m\n"
     end=$SECONDS
     duration=$(( end - start ))
-    printf "\033[0;32m> $KERNEL_NAME kernel ci build completed in %dh:%dm:%ds \033[0;0m" $(($duration/3600)) $(($duration%3600/60)) $(($duration%60))
+    printf "\033[0;32m> $KERNEL_NAME kernel ci build completed in %dh:%dm:%ds \033[0;0m" $((duration/3600)) $((duration%3600/60)) $((duration%60))
 fi
 
 # get current kernel makefile version
