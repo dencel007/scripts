@@ -12,7 +12,7 @@ export TZ="Asia/Kolkata"
 # make more room in the environment
 # sudo rm -rf ~/.rbenv ~/.phpbrew
 
-cd $SEMAPHORE_PROJECT_DIR
+cd "$SEMAPHORE_PROJECT_DIR"
 
 echo -e "\n\033[0;30m##################################################"
 echo -e "\033[0;92m### semaphore ci v1.0 - kernel building script ###"
@@ -85,11 +85,11 @@ export IMAGE_OUT=$OUT_DIR/arch/arm64/boot/Image.gz-dtb
 
 # functions - credits: @infinity-plus and @Vvr-RockStar
 function SendDoc() {
-	curl -F chat_id=$CHAT_ID -F document=@"$1" -F caption="$2" https://api.telegram.org/bot$BOT_API_KEY/sendDocument 1> /dev/null
+	curl -F chat_id="$CHAT_ID" -F document=@"$1" -F caption="$2" https://api.telegram.org/bot"$BOT_API_KEY"/sendDocument 1> /dev/null
 }
 
 function SendMsg() {
-	curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendMessage  -d "parse_mode=markdown" -d text="$1 " -d chat_id=$CHAT_ID 1> /dev/null
+	curl -s -X POST https://api.telegram.org/bot"$BOT_API_KEY"/sendMessage  -d "parse_mode=markdown" -d text="$1 " -d chat_id="$CHAT_ID" 1> /dev/null
 }
 
 function sendlog() {
@@ -108,8 +108,8 @@ function sendlog() {
 }
 
 function transfer() {
-  zipname="$(echo $1 | awk -F '/' '{print $NF}')"
-  url="$(curl -# -T $1 https://transfer.sh)"
+  zipname="$(echo "$1" | awk -F '/' '{print $NF}')"
+  url="$(curl -# -T "$1" https://transfer.sh)"
   echo -e "\n\033[0;35m>download ${zipname} at ${url} \033[0;0m\n"
 }
 
@@ -147,71 +147,71 @@ export CROSS_COMPILE=$GCCDIR/bin/aarch64-linux-gnu-
 
 if [[ "$*" == *"-gcc8"* ]]
  then
-  git clone https://github.com/RaphielGang/aarch64-linux-gnu-8.x $HOME/gcc-host-linux-x86 --depth=1
+  git clone https://github.com/RaphielGang/aarch64-linux-gnu-8.x "$HOME"/gcc-host-linux-x86 --depth=1
 elif [[ "$*" == *"-gcc9"* ]]
 then
-  git clone https://github.com/Haseo97/aarch64-elf-gcc -b master $HOME/gcc-host-linux-x86 --depth=1
+  git clone https://github.com/Haseo97/aarch64-elf-gcc -b master "$HOME"/gcc-host-linux-x86 --depth=1
   export CROSS_COMPILE=$GCCDIR/bin/aarch64-elf-
 elif [[ "$*" == *"-linaro7"* ]]
 then
-  git clone https://github.com/teamfirangi/linaro-7.3 $HOME/gcc-host-linux-x86 --depth=1
+  git clone https://github.com/teamfirangi/linaro-7.3 "$HOME"/gcc-host-linux-x86 --depth=1
 else
-  git clone https://github.com/ryan-andri/aarch64-linaro-linux-gnu-4.9 $HOME/gcc-host-linux-x86 --depth=1
+  git clone https://github.com/ryan-andri/aarch64-linaro-linux-gnu-4.9 "$HOME"/gcc-host-linux-x86 --depth=1
 fi
 
 # get arm toochain
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 $HOME/gcc-host-linux --depth=1
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9 "$HOME"/gcc-host-linux --depth=1
 
 # get gcc version - credits: @infinity-plus
-export GCCVERSION=$($GCCDIR/bin/*-gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+export GCCVERSION=$("$GCCDIR"/bin/*-gcc --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 echo -e "\033[0;31m\n$GCCVERSION ready to compile ! \033[0;0m\n"
 
 # get clang
 if [[ $GITBRANCH == dtc ]]
 then
-  git clone https://github.com/VRanger/dragontc $HOME/clang-host-linux-x86 --depth=1
+  git clone https://github.com/VRanger/dragontc "$HOME"/clang-host-linux-x86 --depth=1
 elif [[ $GITBRANCH == clang ]]
 then
-  git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5407736 $HOME/clang-host-linux-x86 --depth=1
+  git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5407736 "$HOME"/clang-host-linux-x86 --depth=1
 fi
 
 if [[ -e $HOME/clang-host-linux-x86 ]]
 then
-  export CLANGVERSION=$($CLANGDIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+  export CLANGVERSION=$("$CLANGDIR"/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
   echo -e "\033[0;31m\n$CLANGVERSION ready to compile ! \033[0;0m\n"
 fi
 
 # get anykernel2
 #Clean ZIP_DIR, if any
-rm -rf ${ZIP_DIR}
+rm -rf "${ZIP_DIR}"
 
 if [[ $GITBRANCH == miui ]]
 then
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-modules ${ZIP_DIR} --depth=1
+  git clone https://github.com/dencel007/AnyKernel2 -b santoni-modules "${ZIP_DIR}" --depth=1
 else
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-main ${ZIP_DIR} --depth=1
+  git clone https://github.com/dencel007/AnyKernel2 -b santoni-main "${ZIP_DIR}" --depth=1
 fi
 
 # prepend ccache into the PATH
 echo 'export PATH="/usr/lib/ccache:$PATH"' | tee -a ~/.bashrc
 
 # source bashrc to test the new PATH
-source ~/.bashrc && echo $PATH
+source ~/.bashrc && echo "$PATH"
 
 export USE_CCACHE=1
 ccache -M 6G
 
-cd $SEMAPHORE_PROJECT_DIR
+cd "$SEMAPHORE_PROJECT_DIR"
 
 # out directory config - why ?
 # http://bit.ly/2UQv06H - read thoroughly
-if [ -e ${OUT_DIR} ]
+if [ -e "${OUT_DIR}" ]
 then
   echo -e "\n\033[0;32m> out directory already exists ! deleting it.... \033[0;0m\n" 
-  rm -rf ${OUT_DIR}
+  rm -rf "${OUT_DIR}"
 else
   echo -e "\n\033[0;32m> out directory doesn't exist ! creating it.... \033[0;0m\n" 
-  mkdir -pv ${OUT_DIR}
+  mkdir -pv "${OUT_DIR}"
 fi
 export MAKE="make O=out"
 echo -e "\n\033[0;32m> executing make clean \033[0;0m\n"
@@ -223,7 +223,7 @@ ${MAKE} clean
 
 export ARCH=arm64
 export SUBARCH=arm64
-$MAKE $DEFCONFIGK
+$MAKE "$DEFCONFIGK"
 
 # Want custom kernel flags ?
 # =========================
@@ -250,20 +250,20 @@ then
   echo -e "\n\033[0;35m> starting CLANG kernel build with $CLANGVERSION toolchain \033[0;0m\n"
 
   PATH="$HOME/clang-host-linux-x86/bin:$HOME/gcc-host-linux-x86/bin:${PATH}"
-  ${MAKE} -j$(nproc --all) \
+  ${MAKE} -j"$(nproc --all)" \
                          ARCH=$ARCH \
                          SUBARCH=$SUBARCH \
-                         CC=$HOME/clang-host-linux-x86/bin/clang \
+                         CC="$HOME"/clang-host-linux-x86/bin/clang \
                          CLANG_TRIPLE=aarch64-linux-gnu- \
-                         CLANG_LD_PATH=${HOME}/clang-host-linux-x86/clang/lib \
-                         LLVM_DIS=${HOME}/clang-host-linux-x86/bin/llvm-dis 2>&1 | tee build-log.txt
+                         CLANG_LD_PATH="${HOME}"/clang-host-linux-x86/clang/lib \
+                         LLVM_DIS="${HOME}"/clang-host-linux-x86/bin/llvm-dis 2>&1 | tee build-log.txt
 else
   start=$SECONDS
   echo -e "\033[0;35m> starting AOSP kernel build with $GCCVERSION toolchain \033[0;0m\n"
 
   export CROSS_COMPILE_ARM32=$HOME/gcc-host-linux/bin/arm-linux-androideabi-
 
-  ${MAKE} -j$(nproc --all) \
+  ${MAKE} -j"$(nproc --all)" \
                          ARCH="$ARCH" \
                          CROSS_COMPILE="$CROSS_COMPILE" \
                          CROSS_COMPILE_ARM32="$CROSS_COMPILE_ARM32" \
@@ -291,7 +291,7 @@ KERNEL_VERSION=$(head -n3 Makefile | sed -E 's/.*(^\w+\s[=]\s)//g' | xargs | sed
 echo -e "\033[0;36m> packing ${KERNEL_NAME}.${OSTYPE}.${OSVERSION} kernel v$KERNEL_VERSION  \033[0;0m\n"
 echo -e "\n\n\033[0;35m> ================== now, let's zip it ! ===================\033[0;0m\n"
 
-cd $SEMAPHORE_PROJECT_DIR
+cd "$SEMAPHORE_PROJECT_DIR"
 
 # modules directory config
 # modules strip starts for miui
@@ -303,29 +303,29 @@ then
   if [[ -d $MODULES_DIR ]]
   then
     echo -e "\n cleaning old modules folder \n"
-    rm -rf $MODULES_DIR
+    rm -rf "$MODULES_DIR"
   else
-    mkdir -pv $MODULES_DIR
+    mkdir -pv "$MODULES_DIR"
     echo -e "\n made new modules folder \n"
   fi
  find . -name '*ko' -exec \cp '{}' modules/ \;
- sudo chmod -R 755 $MODULES_DIR/*
+ sudo chmod -R 755 "$MODULES_DIR"/*
 
- "$CROSS_COMPILE"strip --strip-unneeded $MODULES_DIR/* 2>/dev/null
- "$CROSS_COMPILE"strip --strip-debug $MODULES_DIR/* 2>/dev/null
+ "$CROSS_COMPILE"strip --strip-unneeded "$MODULES_DIR"/* 2>/dev/null
+ "$CROSS_COMPILE"strip --strip-debug "$MODULES_DIR"/* 2>/dev/null
 
- mkdir -pv $ZIPMODULES_DIR/system/lib/modules
- sudo chmod -R 755 $ZIPMODULES_DIR/*
- cp -f $MODULES_DIR/*.ko $ZIPMODULES_DIR/system/lib/modules
- mkdir -pv $ZIPMODULES_DIR/system/lib/modules/pronto
- cp -f $ZIPMODULES_DIR/system/lib/modules/wlan.ko $ZIPMODULES_DIR/system/lib/modules/pronto/pronto_wlan.ko
+ mkdir -pv "$ZIPMODULES_DIR"/system/lib/modules
+ sudo chmod -R 755 "$ZIPMODULES_DIR"/*
+ cp -f "$MODULES_DIR"/*.ko "$ZIPMODULES_DIR"/system/lib/modules
+ mkdir -pv "$ZIPMODULES_DIR"/system/lib/modules/pronto
+ cp -f "$ZIPMODULES_DIR"/system/lib/modules/wlan.ko "$ZIPMODULES_DIR"/system/lib/modules/pronto/pronto_wlan.ko
 fi
 
 # make flashable zip using anykernel
-rm -rf $ZIP_DIR/zImage $ZIP_DIR/*.zip
-mv $IMAGE_OUT $ZIP_DIR/zImage
-cd $ZIP_DIR
-zip -r9 ${FINAL_ZIP} * -x .git README.md *placeholder
+rm -rf "$ZIP_DIR"/zImage "$ZIP_DIR"/*.zip
+mv "$IMAGE_OUT" "$ZIP_DIR"/zImage
+cd "$ZIP_DIR"
+zip -r9 "${FINAL_ZIP}" * -x .git README.md *placeholder
 cd -
 
 # upload zip to transfer.sh
@@ -362,8 +362,8 @@ then
  SendDoc "$FINAL_ZIP" "$caption"
  SendMsg "$text"
 
- curl -s -X POST https://api.telegram.org/bot$BOT_API_KEY/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id=$CHAT_ID
- rm -rf $ZIP_DIR/$ZIP_NAME
+ curl -s -X POST https://api.telegram.org/bot"$BOT_API_KEY"/sendSticker -d sticker="CAADBQADuQADLG6EE9HnR-_L0F2YAg" -d chat_id="$CHAT_ID"
+ rm -rf "$ZIP_DIR"/"$ZIP_NAME"
  echo -e "\n\n \033[0;35m> ======= aye, now go on, flash zip and brick yo device sur =======\033[0;0m\n"
 else
 echo -e "\n\033[0;31m> zip creation failed \033[0;0m\n"
