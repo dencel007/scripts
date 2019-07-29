@@ -185,11 +185,18 @@ fi
 #Clean ZIP_DIR, if any
 rm -rf "${ZIP_DIR}"
 
-if [[ $GITBRANCH == miui ]]
+if [[ $DEVICE == santoni && $GITBRANCH == miui ]]
 then
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-modules "${ZIP_DIR}" --depth=1
-else
-  git clone https://github.com/dencel007/AnyKernel2 -b santoni-main "${ZIP_DIR}" --depth=1
+  git clone https://github.com/dencel007/AnyKernel -b santoni-modules "${ZIP_DIR}" --depth=1
+elif [[ $DEVICE == santoni && $GITBRANCH != miui ]]
+then
+  git clone https://github.com/dencel007/AnyKernel -b santoni-main "${ZIP_DIR}" --depth=1
+elif [[ $DEVICE == davinci && $GITBRANCH == miui ]]
+then
+  git clone https://github.com/dencel007/AnyKernel -b davinci-modules "${ZIP_DIR}" --depth=1
+elif [[ $DEVICE == davinci && $GITBRANCH != miui ]]
+then
+  git clone https://github.com/dencel007/AnyKernel -b davinci-main "${ZIP_DIR}" --depth=1
 fi
 
 # prepend ccache into the PATH
