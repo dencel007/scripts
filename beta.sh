@@ -167,10 +167,10 @@ export GCCVERSION=$("$GCCDIR"/bin/*-gcc --version | head -n 1 | perl -pe 's/\(ht
 echo -e "\033[0;31m\n$GCCVERSION ready to compile ! \033[0;0m\n"
 
 # get clang
-if [[ $GITBRANCH == dtc ]]
+if [[ $GITBRANCH == dtc || "$*" == *"-dtc"* ]]
 then
   git clone https://github.com/VRanger/dragontc "$HOME"/clang-host-linux-x86 --depth=1
-elif [[ $GITBRANCH == clang ]]
+elif [[ $GITBRANCH == clang || "$*" == *"-clang"* ]]
 then
   git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5407736 "$HOME"/clang-host-linux-x86 --depth=1
 fi
