@@ -172,7 +172,7 @@ then
   git clone https://github.com/VRanger/dragontc "$HOME"/clang-host-linux-x86 --depth=1
 elif [[ $GITBRANCH == clang || "$*" == *"-clang"* ]]
 then
-  git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5407736 "$HOME"/clang-host-linux-x86 --depth=1
+  git clone https://github.com/crdroidandroid/android_prebuilts_clang_host_linux-x86_clang-5484270 "$HOME"/clang-host-linux-x86 --depth=1
 fi
 
 if [[ -e $HOME/clang-host-linux-x86 ]]
