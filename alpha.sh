@@ -321,13 +321,11 @@ then
   transfer "$FINAL_ZIP"
 fi
 
-# Get TC version
-evv LINUX_COMPILER
-
+# verify the toolchain - @infinity-plus
 if [[ "$*" == *"-clang"* || "$*" == *"-dtc"* ]]; then
-  TC="$CLANGVERSION"
+  export TC_TYPE=$CLANGVERSION
 else
-  TC="$LINUX_COMPILER"
+  export TC_TYPE=$((sed '7q;d' out/include/generated/compile.h) | awk '{$1=""; $2=""; print $0}' | cut -d '"' -f 2)
 fi
 
 # final push to telegram
@@ -344,8 +342,8 @@ then
  🔰 linux-version : $KERNEL_VERSION
  🕐 build-time : $((duration%3600/60))m:$((duration%60))s
 
- toolchain :
- $TC
+toolchain :
+$TC_TYPE
 
  last commit :
  $(git log --pretty=format:'%h | %s' -1)
