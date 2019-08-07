@@ -279,31 +279,31 @@ echo -e "\n\n\033[0;35m> ================== now, let's zip it ! ================
 cd "$SEMAPHORE_PROJECT_DIR"
 
 # modules directory config
-# modules strip starts for miui
-
-if [[ $OSTYPE == MIUI ]]
-then
-  export MODULES_DIR=${SEMAPHORE_PROJECT_DIR}/modules/system/lib/modules
-  export ZIPMODULES_DIR=${ZIP_DIR}/modules
-  if [[ -d $MODULES_DIR ]]
-  then
+if [[ $OSTYPE == MIUI ]]; then
+export MODULES_DIR=${SEMAPHORE_PROJECT_DIR}/modules/system/lib/modules
+export ZIPMODULES_DIR=${ZIP_DIR}/modules
+  if [[ -d $MODULES_DIR ]]; then
     echo -e "\n cleaning old modules folder \n"
-    rm -rf "$MODULES_DIR"
+    rm -rf $MODULES_DIR
   else
-    mkdir -pv "$MODULES_DIR"
+    mkdir -pv $MODULES_DIR
     echo -e "\n made new modules folder \n"
   fi
-  find . -name '*ko' -exec \ cp '{}' modules/ \;
-  chmod 755 modules/*
+fi
+
+# modules strip starts for miui
+if [[ $OSTYPE == MIUI ]]; then
+  find -name "*.ko" -exec mv {} $MODULES_DIR \;
+  sudo chmod -R 755 $MODULES_DIR/*
 
  "$CROSS_COMPILE"strip --strip-unneeded "$MODULES_DIR"/* 2>/dev/null
  "$CROSS_COMPILE"strip --strip-debug "$MODULES_DIR"/* 2>/dev/null
 
- mkdir -pv "$ZIPMODULES_DIR"/system/lib/modules
- sudo chmod -R 755 "$ZIPMODULES_DIR"/*
- cp -f "$MODULES_DIR"/*.ko "$ZIPMODULES_DIR"/system/lib/modules
- mkdir -pv "$ZIPMODULES_DIR"/system/lib/modules/pronto
- cp -f "$ZIPMODULES_DIR"/system/lib/modules/wlan.ko "$ZIPMODULES_DIR"/system/lib/modules/pronto/pronto_wlan.ko
+  mkdir -pv $ZIPMODULES_DIR/system/lib/modules
+  sudo chmod -R 755 $ZIPMODULES_DIR/*
+  cp -f $MODULES_DIR/*.ko $ZIPMODULES_DIR/system/lib/modules
+  mkdir -pv $ZIPMODULES_DIR/system/lib/modules/pronto
+  cp -f $ZIPMODULES_DIR/system/lib/modules/wlan.ko $ZIPMODULES_DIR/system/lib/modules/pronto/pronto_wlan.ko
 fi
 
 # make flashable zip using anykernel
@@ -324,6 +324,12 @@ fi
 # Get TC version
 evv LINUX_COMPILER
 
+if [[ "$*" == *"-clang"* || "$*" == *"-dtc"* ]]; then
+  TC="$CLANGVERSION"
+else
+  TC="$LINUX_COMPILER"
+fi
+
 # final push to telegram
 if [ -f "$FINAL_ZIP" ]
 then
@@ -339,7 +345,7 @@ then
  🕐 build-time : $((duration%3600/60))m:$((duration%60))s
 
  toolchain :
- $LINUX_COMPILER
+ $TC
 
  last commit :
  $(git log --pretty=format:'%h | %s' -1)
